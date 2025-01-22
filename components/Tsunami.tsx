@@ -3,23 +3,50 @@
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
+import L from 'leaflet';
 
-const MapContent = () => {
+interface MapContentProps {
+  onLocationSelect?: (lat: number, lng: number) => void;
+  selectedLocation?: { lat: number; lng: number } | null;
+}
+
+const MapContent = ({
+  onLocationSelect,
+  selectedLocation,
+}: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<LeafletMap | null>(null);
   const marker = useRef<any | null>(null);
   const rectangle = useRef<any | null>(null);
 
+  const updateMapMarkers = (lat: number, lng: number) => {
+    if (!mapInstance.current) return;
+
+    if (marker.current) marker.current.remove();
+    if (rectangle.current) rectangle.current.remove();
+
+    marker.current = L.marker([lat, lng]).addTo(mapInstance.current);
+
+    rectangle.current = L.rectangle(
+      [
+        [lat - 0.5, lng - 0.5],
+        [lat + 0.5, lng + 0.5],
+      ],
+      { color: 'red', weight: 2, fillOpacity: 0.1 },
+    ).addTo(mapInstance.current);
+
+    mapInstance.current.setView([lat, lng], 8);
+  };
+
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Prevent multiple initializations
     if (mapInstance.current) {
       mapInstance.current.remove();
       mapInstance.current = null;
     }
 
-    let isMapValid = true; // Flag to track component mount state
+    let isMapValid = true;
 
     const initMap = async () => {
       try {
@@ -35,8 +62,6 @@ const MapContent = () => {
 
         if (!isMapValid || !mapRef.current) return;
 
-        // Fix for missing marker icons in Leaflet
-        // https://github.com/PaulLeCam/react-leaflet/issues/808
         L.Icon.Default.mergeOptions({
           iconUrl: markerIcon.src,
           iconRetinaUrl: markerIcon2x.src,
@@ -51,25 +76,13 @@ const MapContent = () => {
         }).addTo(mapInstance.current);
 
         mapInstance.current.on('click', ({ latlng: { lat, lng } }) => {
-          if (!mapInstance.current) return;
-
-          if (marker.current) marker.current.remove();
-          if (rectangle.current) rectangle.current.remove();
-
-          marker.current = L.marker([lat, lng]).addTo(mapInstance.current);
-
-          // Add new rectangle (50km buffer)
-          // TODO: The rectangle should be calculated using the API data
-          rectangle.current = L.rectangle(
-            [
-              [lat - 0.5, lng - 0.5],
-              [lat + 0.5, lng + 0.5],
-            ],
-            { color: 'red', weight: 2, fillOpacity: 0.1 },
-          ).addTo(mapInstance.current);
-
-          mapInstance.current.setView([lat, lng], 8);
+          onLocationSelect?.(lat, lng);
         });
+
+        // If there's an initial location, show it
+        if (selectedLocation) {
+          updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
+        }
       } catch (error) {
         console.error('Error initializing map:', error);
       }
@@ -88,12 +101,19 @@ const MapContent = () => {
     };
   }, []);
 
+  // Update markers when selectedLocation changes
+  useEffect(() => {
+    if (selectedLocation) {
+      updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
+    }
+  }, [selectedLocation]);
+
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden" ref={mapRef} />
   );
 };
 
-export default dynamic(() => Promise.resolve(MapContent), {
+const TsunamiMap = dynamic(() => Promise.resolve(MapContent), {
   ssr: false,
   loading: () => (
     <div className="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
@@ -101,3 +121,5 @@ export default dynamic(() => Promise.resolve(MapContent), {
     </div>
   ),
 });
+
+export default TsunamiMap;

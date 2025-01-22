@@ -15,8 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useCallback, useState } from 'react';
-import { AlertCircle, Info } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import TsunamiMap from '@/components/Tsunami';
@@ -66,11 +65,19 @@ const getRiskLevelClass = (level: string) => {
   return levels[level] || 'bg-gray-50 text-gray-700';
 };
 
+const formatCoordinate = (value: number, decimals: number = 6): number => {
+  return Number(value.toFixed(decimals));
+};
+
 const Body = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [calculationResult, setCalculationResult] =
     useState<CalculationResponse | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof generateFormSchema>>({
@@ -84,6 +91,41 @@ const Body = () => {
     },
   });
 
+  const handleLocationSelect = useCallback(
+    (lat: number, lng: number) => {
+      const formattedLat = formatCoordinate(lat);
+      const formattedLng = formatCoordinate(lng);
+
+      setSelectedLocation({ lat: formattedLat, lng: formattedLng });
+      form.setValue('latitude', formattedLat, { shouldValidate: true });
+      form.setValue('longitude', formattedLng, { shouldValidate: true });
+
+      toast.success('Ubicación actualizada', {
+        icon: '📍',
+        duration: 2000,
+      });
+    },
+    [form],
+  );
+
+  // Watch form values for latitude and longitude
+  const latitude = form.watch('latitude');
+  const longitude = form.watch('longitude');
+
+  // Update map when form values change directly
+  useEffect(() => {
+    if (
+      selectedLocation === null ||
+      formatCoordinate(latitude) !== selectedLocation.lat ||
+      formatCoordinate(longitude) !== selectedLocation.lng
+    ) {
+      setSelectedLocation({
+        lat: formatCoordinate(latitude),
+        lng: formatCoordinate(longitude),
+      });
+    }
+  }, [latitude, longitude]);
+
   const handleSubmit = useCallback(
     async (values: z.infer<typeof generateFormSchema>) => {
       setIsLoading(true);
@@ -96,12 +138,14 @@ const Body = () => {
           body: JSON.stringify({
             ...values,
             datetime: values.datetime.toISOString(),
+            latitude: formatCoordinate(values.latitude),
+            longitude: formatCoordinate(values.longitude),
           }),
         });
 
         if (!response.ok) throw new Error('Error en el cálculo del tsunami');
 
-        const data = await response.json();
+        const data: CalculationResponse = await response.json();
         setCalculationResult(data);
 
         va.track('Tsunami Calculado', {
@@ -155,8 +199,8 @@ const Body = () => {
                   Simulador de Tsunami
                 </h2>
                 <p className="text-blue-600">
-                  Complete los datos del evento sísmico para calcular la posible
-                  generación de un tsunami.
+                  Complete los datos del evento sísmico o seleccione una
+                  ubicación en el mapa.
                 </p>
               </motion.div>
 
@@ -266,7 +310,7 @@ const Body = () => {
                   name="datetime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha y hora del Evento</FormLabel>
+                      <FormLabel>Fecha y Hora del Evento</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
@@ -307,16 +351,6 @@ const Body = () => {
                   )}
                 </Button>
               </motion.div>
-
-              {error && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{error.message}</AlertDescription>
-                  </Alert>
-                </motion.div>
-              )}
             </form>
           </Form>
         </div>
@@ -385,7 +419,13 @@ const Body = () => {
             animate={{ opacity: 1 }}
             className="flex flex-col justify-center relative h-auto items-center bg-gray-50 rounded-lg p-4"
           >
-            <TsunamiMap />
+            <TsunamiMap
+              onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+            />
+            <p className="text-sm text-gray-600 mt-2 text-center">
+              Haga clic en el mapa para seleccionar la ubicación del epicentro
+            </p>
           </motion.div>
         </div>
       </div>
