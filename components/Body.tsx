@@ -22,6 +22,7 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import downloadQrCode from '@/utils/downloadQrCode';
+import TsunamiMap from '@/components/Tsunami';
 import va from '@vercel/analytics';
 import { PromptSuggestion } from '@/components/PromptSuggestion';
 import { useRouter } from 'next/navigation';
@@ -251,44 +252,9 @@ const Body = ({
           </Form>
         </div>
         <div className="col-span-1">
-          { (
-            <>
-              <div>
-                <div className="flex flex-col justify-center relative h-auto items-center">
-                  {response ? (
-                    <QrCard
-                      imageURL={response.image_url}
-                      time={(response.model_latency_ms / 1000).toFixed(2)}
-                    />
-                  ) : (
-                    <div className="relative flex flex-col justify-center items-center gap-y-2 w-[510px] border border-gray-300 rounded shadow group p-2 mx-auto animate-pulse bg-gray-400 aspect-square max-w-full" />
-                  )}
-                </div>
-                {response && (
-                  <div className="flex justify-center gap-5 mt-4">
-                    <Button
-                      onClick={() =>
-                        downloadQrCode(response.image_url, 'qrCode')
-                      }
-                    >
-                      Download
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `https://qrgpt.io/start/${id || ''}`,
-                        );
-                        toast.success('Link copied to clipboard');
-                      }}
-                    >
-                      ✂️ Share
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+          <div className="flex flex-col justify-center relative h-auto items-center">
+            <TsunamiMap />
+          </div>
         </div>
       </div>
       <Toaster />
