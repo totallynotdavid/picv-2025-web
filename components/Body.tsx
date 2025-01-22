@@ -251,11 +251,8 @@ const Body = ({
           </Form>
         </div>
         <div className="col-span-1">
-          {submittedURL && (
+          { (
             <>
-              <h1 className="text-3xl font-bold sm:mb-5 mb-5 mt-5 sm:mt-0 sm:text-center text-left">
-                Your QR Code
-              </h1>
               <div>
                 <div className="flex flex-col justify-center relative h-auto items-center">
                   {response ? (
