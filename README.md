@@ -6,14 +6,37 @@ TSDHN es una aplicación web para la estimación de parámetros de tsunamis de o
 
 ```mermaid
 flowchart LR
-    User((Usuario)) --> Frontend[Frontend\nNext.js + TypeScript]
-    Frontend --> CloudflarePages[Cloudflare Pages]
-    CloudflarePages --> API[API REST\nPython]
-    API --> Model[Modelo Numérico\nFortran]
-    Model --> API
-    API --> CloudflarePages
-    CloudflarePages --> Frontend
-    Frontend --> User
+    subgraph Cliente
+        User((👤 Usuario))
+        style User fill:#f9f,stroke:#333
+    end
+
+    subgraph CapaFrontend["Frontend"]
+        direction TB
+        Web["🌐 Aplicación web<br/>(Next.js + TypeScript)"]
+        style Web fill:#90CAF9,stroke:#1565C0
+    end
+
+    subgraph Despliegue["Deploy"]
+        CF["☁️ Cloudflare Pages"]
+        style CF fill:#F4511E,stroke:#BF360C
+    end
+
+    subgraph Backend["Backend"]
+        API["⚙️ API REST<br/>(Python)"]
+        Model["📊 Modelo numérico<br/>(Fortran)"]
+        style API fill:#81C784,stroke:#2E7D32
+        style Model fill:#FFB74D,stroke:#EF6C00
+    end
+
+    %% Conexiones
+    User <--> Web
+    Web <--> CF
+    CF <--> API
+    API <--> Model
+
+    classDef default fill:#fff,stroke:#333,stroke-width:2px
+    linkStyle default stroke:#666,stroke-width:2px
 ```
 
 El sistema está dividido en dos componentes principales que trabajan en conjunto para procesar y visualizar las simulaciones de tsunamis:
