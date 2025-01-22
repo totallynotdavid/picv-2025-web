@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
-import L from 'leaflet';
+import LeafletCSS from '@/components/LeafletCSS';
 
 interface MapContentProps {
   onLocationSelect?: (lat: number, lng: number) => void;
@@ -19,8 +19,10 @@ const MapContent = ({
   const marker = useRef<any | null>(null);
   const rectangle = useRef<any | null>(null);
 
-  const updateMapMarkers = (lat: number, lng: number) => {
+  const updateMapMarkers = async (lat: number, lng: number) => {
     if (!mapInstance.current) return;
+
+    const L = (await import('leaflet')).default;
 
     if (marker.current) marker.current.remove();
     if (rectangle.current) rectangle.current.remove();
@@ -79,7 +81,6 @@ const MapContent = ({
           onLocationSelect?.(lat, lng);
         });
 
-        // If there's an initial location, show it
         if (selectedLocation) {
           updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
         }
@@ -101,7 +102,6 @@ const MapContent = ({
     };
   }, []);
 
-  // Update markers when selectedLocation changes
   useEffect(() => {
     if (selectedLocation) {
       updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
@@ -109,7 +109,13 @@ const MapContent = ({
   }, [selectedLocation]);
 
   return (
-    <div className="w-full h-[600px] rounded-lg overflow-hidden" ref={mapRef} />
+    <>
+      <LeafletCSS />
+      <div
+        className="w-full h-[600px] rounded-lg overflow-hidden"
+        ref={mapRef}
+      />
+    </>
   );
 };
 
