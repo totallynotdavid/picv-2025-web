@@ -24,9 +24,14 @@ const MapContent = () => {
     const initMap = async () => {
       try {
         const L = (await import('leaflet')).default;
-        const markerIcon = (await import('leaflet/dist/images/marker-icon.png')).default;
-        const markerIcon2x = (await import('leaflet/dist/images/marker-icon-2x.png')).default;
-        const markerShadow = (await import('leaflet/dist/images/marker-shadow.png')).default;
+        const markerIcon = (await import('leaflet/dist/images/marker-icon.png'))
+          .default;
+        const markerIcon2x = (
+          await import('leaflet/dist/images/marker-icon-2x.png')
+        ).default;
+        const markerShadow = (
+          await import('leaflet/dist/images/marker-shadow.png')
+        ).default;
 
         if (!isMapValid || !mapRef.current) return;
 
@@ -42,7 +47,7 @@ const MapContent = () => {
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
-          attribution: '© OpenStreetMap contributors'
+          attribution: '© OpenStreetMap contributors',
         }).addTo(mapInstance.current);
 
         mapInstance.current.on('click', ({ latlng: { lat, lng } }) => {
@@ -58,9 +63,9 @@ const MapContent = () => {
           rectangle.current = L.rectangle(
             [
               [lat - 0.5, lng - 0.5],
-              [lat + 0.5, lng + 0.5]
+              [lat + 0.5, lng + 0.5],
             ],
-            { color: 'red', weight: 2, fillOpacity: 0.1 }
+            { color: 'red', weight: 2, fillOpacity: 0.1 },
           ).addTo(mapInstance.current);
 
           mapInstance.current.setView([lat, lng], 8);
@@ -94,5 +99,5 @@ export default dynamic(() => Promise.resolve(MapContent), {
     <div className="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
       Cargando mapa...
     </div>
-  )
+  ),
 });
