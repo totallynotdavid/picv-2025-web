@@ -310,7 +310,7 @@ const Body = () => {
                   name="datetime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha y Hora del Evento</FormLabel>
+                      <FormLabel>Fecha y hora del Evento</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
