@@ -90,7 +90,7 @@ Para configurar un nuevo deploy en Cloudflare Pages:
 
 ## Equipo
 
-El desarrollo está a cargo de un equipo multidisciplinario de la UNMSM:
+El desarrollo está a cargo de:
 
 - Cesar Jimenez (Coordinador)
 - David Duran ([@totallynotdavid](https://github.com/totallynotdavid))
