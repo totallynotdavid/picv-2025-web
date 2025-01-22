@@ -43,7 +43,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between py-3 md:py-5 md:block">
             <Link href="/" className="flex items-center gap-3">
               <Image src="/box.svg" alt="logo" width={30} height={30} />
-              <div className="font-bold text-lg">QrGPT</div>
+              <div className="font-bold text-lg">Logo</div>
             </Link>
             <div className="md:hidden">
               <button
@@ -84,31 +84,7 @@ const Navbar = () => {
               </button>
             </div>
           </div>
-          <div
-            className={`flex-1 pb-3 mt-8 md:pb-0 md:mt-0 md:block ${
-              state ? '' : 'hidden'
-            }`}
-          >
-            <ul className="text-gray-700 justify-end items-center space-y-6 md:flex md:space-x-6 md:space-y-0 md:text-gray-600 md:font-medium">
-              {navigation.map((item, idx) => {
-                return (
-                  <li key={idx} className="duration-150 hover:text-gray-900">
-                    <Link href={item.path} className="block">
-                      {item.title}
-                    </Link>
-                  </li>
-                );
-              })}
-              <li>
-                <NavLink
-                  href="/start"
-                  className="block font-medium text-sm text-white bg-gray-800 hover:bg-gray-600 active:bg-gray-900 md:inline"
-                >
-                  Generate your QR Code
-                </NavLink>
-              </li>
-            </ul>
-          </div>
+          
         </div>
       </nav>
     </header>
