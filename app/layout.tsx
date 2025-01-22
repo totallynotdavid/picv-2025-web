@@ -8,11 +8,11 @@ import PlausibleProvider from 'next-plausible';
 
 const inter = Inter({ subsets: ['latin'] });
 
-let title = 'QrGPT - QR Code Generator';
-let description = 'Generate your AI QR Code in seconds';
-let url = 'https://www.qrgpt.io';
+let title = 'Pronóstico de tsunamis: TSDHN';
+let description = 'Pronóstico de tsunamis: TSDHN en 10 minutos';
+let url = 'https://tsdhn.vercel.app/';
 let ogimage = 'https://www.qrgpt.io/og-image.png';
-let sitename = 'qrGPT.io';
+let sitename = 'TSDHN';
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description,
     url: url,
     siteName: sitename,
-    locale: 'en_US',
+    locale: 'es_PE',
     type: 'website',
   },
   twitter: {
@@ -44,9 +44,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
-        <PlausibleProvider domain="qrgpt.io" />
+        <PlausibleProvider domain="tsdhn.vercel.app" />
       </head>
       <body className={inter.className}>
         <Navbar />
