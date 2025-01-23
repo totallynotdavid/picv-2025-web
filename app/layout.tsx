@@ -50,7 +50,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Navbar />
-        <main className="flex min-h-full flex-col justify-center items-center">
+        <main className="flex flex-col justify-center items-center">
           {children}
         </main>
         <Analytics />

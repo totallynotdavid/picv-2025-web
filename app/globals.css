@@ -9,6 +9,10 @@ body,
   height: 100%;
 }
 
+main {
+  min-height: 81%;
+}
+
 .custom-screen {
   @apply max-w-screen-xl mx-auto px-4 md:px-8;
 }
