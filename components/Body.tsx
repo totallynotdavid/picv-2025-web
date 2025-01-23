@@ -181,9 +181,9 @@ const Body = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex justify-center items-center flex-col w-full lg:p-0 p-4 sm:mb-28 mb-0"
+      className="flex justify-center items-center flex-col w-full lg:p-0 p-4 mb-0"
     >
-      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 mt-10">
+      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
         <div className="col-span-1">
           <Form {...form}>
             <form
@@ -196,7 +196,7 @@ const Body = () => {
                 className="bg-blue-50 p-4 rounded-lg mb-6"
               >
                 <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                  Simulador de Tsunami
+                  Simulador de tsunami de origen lejano
                 </h2>
                 <p className="text-blue-600">
                   Complete los datos del evento sísmico o seleccione una
@@ -267,7 +267,7 @@ const Body = () => {
                         <FormControl>
                           <Input
                             type="number"
-                            step="0.000001"
+                            step="0.1"
                             placeholder="-90 a 90"
                             {...field}
                             onChange={(e) =>
@@ -290,7 +290,7 @@ const Body = () => {
                         <FormControl>
                           <Input
                             type="number"
-                            step="0.000001"
+                            step="0.1"
                             placeholder="-180 a 180"
                             {...field}
                             onChange={(e) =>
@@ -310,7 +310,7 @@ const Body = () => {
                   name="datetime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fecha y hora del Evento</FormLabel>
+                      <FormLabel>Fecha y hora del evento</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
