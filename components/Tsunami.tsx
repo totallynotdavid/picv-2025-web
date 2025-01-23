@@ -2,12 +2,17 @@
 
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import type { Map as LeafletMap } from 'leaflet';
+import type { Map as LeafletMap, Layer, LatLngBounds } from 'leaflet';
 import LeafletCSS from '@/components/LeafletCSS';
 
 interface MapContentProps {
   onLocationSelect?: (lat: number, lng: number) => void;
   selectedLocation?: { lat: number; lng: number } | null;
+}
+
+interface LeafletElements {
+  marker: Layer | null;
+  rectangle: Layer | null;
 }
 
 const MapContent = ({
@@ -16,33 +21,62 @@ const MapContent = ({
 }: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<LeafletMap | null>(null);
-  const marker = useRef<any | null>(null);
-  const rectangle = useRef<any | null>(null);
+  const leafletElements = useRef<LeafletElements>({
+    marker: null,
+    rectangle: null,
+  });
+
+  const clearMapElements = () => {
+    if (leafletElements.current.marker) {
+      leafletElements.current.marker.remove();
+      leafletElements.current.marker = null;
+    }
+    if (leafletElements.current.rectangle) {
+      leafletElements.current.rectangle.remove();
+      leafletElements.current.rectangle = null;
+    }
+  };
 
   const updateMapMarkers = async (lat: number, lng: number) => {
     if (!mapInstance.current) return;
 
-    const L = (await import('leaflet')).default;
+    try {
+      const L = (await import('leaflet')).default;
 
-    if (marker.current) marker.current.remove();
-    if (rectangle.current) rectangle.current.remove();
+      // Clear existing markers
+      clearMapElements();
 
-    marker.current = L.marker([lat, lng]).addTo(mapInstance.current);
+      // Add new marker
+      leafletElements.current.marker = L.marker([lat, lng]).addTo(
+        mapInstance.current,
+      );
 
-    rectangle.current = L.rectangle(
-      [
+      // Add new rectangle
+      const bounds: LatLngBounds = L.latLngBounds(
         [lat - 0.5, lng - 0.5],
         [lat + 0.5, lng + 0.5],
-      ],
-      { color: 'red', weight: 2, fillOpacity: 0.1 },
-    ).addTo(mapInstance.current);
+      );
 
-    mapInstance.current.setView([lat, lng], 8);
+      leafletElements.current.rectangle = L.rectangle(bounds, {
+        color: '#2563eb',
+        weight: 2,
+        fillOpacity: 0.1,
+        opacity: 0.8,
+      }).addTo(mapInstance.current);
+
+      mapInstance.current.flyTo([lat, lng], 8, {
+        duration: 1.5,
+        easeLinearity: 0.25,
+      });
+    } catch (error) {
+      console.error('Error updating map markers:', error);
+    }
   };
 
   useEffect(() => {
     if (!mapRef.current) return;
 
+    // Cleanup existing map instance
     if (mapInstance.current) {
       mapInstance.current.remove();
       mapInstance.current = null;
@@ -64,24 +98,36 @@ const MapContent = ({
 
         if (!isMapValid || !mapRef.current) return;
 
+        // Configure default marker icon
         L.Icon.Default.mergeOptions({
           iconUrl: markerIcon.src,
           iconRetinaUrl: markerIcon2x.src,
           shadowUrl: markerShadow.src,
         });
 
-        mapInstance.current = L.map(mapRef.current).setView([0, 0], 2);
+        mapInstance.current = L.map(mapRef.current, {
+          center: [20, 0],
+          zoom: 2,
+          minZoom: 2,
+          maxZoom: 18,
+          zoomControl: true,
+          scrollWheelZoom: true,
+        });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '© OpenStreetMap contributors',
         }).addTo(mapInstance.current);
 
-        mapInstance.current.on('click', ({ latlng: { lat, lng } }) => {
+        mapInstance.current.on('click', (e) => {
+          const { lat, lng } = e.latlng;
           onLocationSelect?.(lat, lng);
         });
 
-        if (selectedLocation) {
+        if (
+          selectedLocation &&
+          (selectedLocation.lat !== 0 || selectedLocation.lng !== 0)
+        ) {
           updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
         }
       } catch (error) {
@@ -93,8 +139,7 @@ const MapContent = ({
 
     return () => {
       isMapValid = false;
-      if (marker.current) marker.current.remove();
-      if (rectangle.current) rectangle.current.remove();
+      clearMapElements();
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
@@ -102,8 +147,12 @@ const MapContent = ({
     };
   }, []);
 
+  // Update markers when selected location changes
   useEffect(() => {
-    if (selectedLocation) {
+    if (
+      selectedLocation &&
+      (selectedLocation.lat !== 0 || selectedLocation.lng !== 0)
+    ) {
       updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
     }
   }, [selectedLocation]);
