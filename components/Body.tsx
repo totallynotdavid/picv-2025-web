@@ -26,6 +26,9 @@ import { toast, Toaster } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import { CalculationResponse, SourceParameters } from '@/utils/types';
+import { getRiskLevelClass, formatCoordinate } from '@/utils/utils';
+
 // Schema definition
 const generateFormSchema = z.object({
   magnitude: z
@@ -47,43 +50,7 @@ const generateFormSchema = z.object({
   datetime: z.date(),
 });
 
-// Interfaces
-interface CalculationResponse {
-  id: string;
-  calculation_time_ms: number;
-  result: {
-    estimated_height: number;
-    arrival_time: string;
-    risk_level: 'Bajo' | 'Moderado' | 'Alto' | 'Extremo';
-  };
-}
-
-interface SourceParameters {
-  Largo: number;
-  Ancho: number;
-  Dislocación: number;
-  Momento_sísmico: number;
-  lat0: number;
-  lon0: number;
-}
-
-// Utility functions
-const getRiskLevelClass = (level: string) => {
-  const levels: Record<string, string> = {
-    Bajo: 'bg-green-50 text-green-700',
-    Moderado: 'bg-yellow-50 text-yellow-700',
-    Alto: 'bg-red-50 text-red-700',
-    Extremo: 'bg-purple-50 text-purple-700',
-  };
-  return levels[level] || 'bg-gray-50 text-gray-700';
-};
-
-const formatCoordinate = (value: number, decimals: number = 6): number => {
-  return Number(value.toFixed(decimals));
-};
-
 const Body = () => {
-  // State management
   const [currentStep, setCurrentStep] = useState(0);
   const [ref, bounds] = useMeasure();
   const [isLoading, setIsLoading] = useState(false);
@@ -153,16 +120,19 @@ const Body = () => {
     values: z.infer<typeof generateFormSchema>,
   ) => {
     try {
-      const response = await fetch('http://192.168.18.218:5000/api/tsunami/source_params', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Mw: values.magnitude,
-          h: values.depth,
-          lat0: values.latitude,
-          lon0: values.longitude,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/tsunami/source_params`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Mw: values.magnitude,
+            h: values.depth,
+            lat0: values.latitude,
+            lon0: values.longitude,
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error('Error fetching source parameters');
       const data = await response.json();

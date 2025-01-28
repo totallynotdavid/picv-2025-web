@@ -21,6 +21,9 @@ export const getRiskLevelClass = (level: string) => {
   return levels[level] || 'bg-gray-50 text-gray-700';
 };
 
-export const formatCoordinate = (value: number, decimals: number = 6): number => {
+export const formatCoordinate = (
+  value: number,
+  decimals: number = 6,
+): number => {
   return Number(value.toFixed(decimals));
 };

@@ -8,21 +8,27 @@ import va from '@vercel/analytics';
 export const useTsunamiCalculator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [calculationResult, setCalculationResult] = useState<CalculationResponse | null>(null);
-  const [sourceParams, setSourceParams] = useState<SourceParameters | null>(null);
+  const [calculationResult, setCalculationResult] =
+    useState<CalculationResponse | null>(null);
+  const [sourceParams, setSourceParams] = useState<SourceParameters | null>(
+    null,
+  );
 
   const fetchSourceParameters = async (values: GenerateFormType) => {
     try {
-      const response = await fetch('http://172.16.57.18:5000/api/tsunami/source_params', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Mw: values.magnitude,
-          h: values.depth,
-          lat0: values.latitude,
-          lon0: values.longitude,
-        }),
-      });
+      const response = await fetch(
+        'http://172.16.57.18:5000/api/tsunami/source_params',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Mw: values.magnitude,
+            h: values.depth,
+            lat0: values.latitude,
+            lon0: values.longitude,
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error('Error fetching source parameters');
       const data = await response.json();
