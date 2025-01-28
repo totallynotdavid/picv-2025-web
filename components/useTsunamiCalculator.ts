@@ -47,16 +47,19 @@ export const useTsunamiCalculator = () => {
     try {
       await fetchSourceParameters(values);
 
-      const response = await fetch('/api/calculate-tsunami', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          datetime: values.datetime.toISOString(),
-          latitude: formatCoordinate(values.latitude),
-          longitude: formatCoordinate(values.longitude),
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/calculate-tsunami`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...values,
+            datetime: values.datetime.toISOString(),
+            latitude: formatCoordinate(values.latitude),
+            longitude: formatCoordinate(values.longitude),
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error('Error en el cálculo del tsunami');
 

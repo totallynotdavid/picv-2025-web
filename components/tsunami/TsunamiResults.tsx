@@ -39,14 +39,14 @@ const TsunamiResults = ({ result }: TsunamiResultsProps) => {
               {format(
                 new Date(result.result.arrival_time),
                 "d 'de' MMMM 'a las' HH:mm",
-                { locale: es }
+                { locale: es },
               )}
             </p>
             <p className="flex items-center">
               <span className="font-semibold mr-2">Nivel de riesgo:</span>
               <span
                 className={`px-2 py-1 rounded-full ${getRiskLevelClass(
-                  result.result.risk_level
+                  result.result.risk_level,
                 )}`}
               >
                 {result.result.risk_level}

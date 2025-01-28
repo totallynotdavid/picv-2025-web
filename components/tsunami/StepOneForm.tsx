@@ -23,7 +23,8 @@ const StepOneForm = ({ form }: StepOneFormProps) => {
           Paso 1: Parámetros Iniciales
         </h2>
         <p className="text-blue-600">
-          Ingrese los datos del evento sísmico o seleccione una ubicación en el mapa.
+          Ingrese los datos del evento sísmico o seleccione una ubicación en el
+          mapa.
         </p>
       </div>
 
@@ -88,7 +89,9 @@ const StepOneForm = ({ form }: StepOneFormProps) => {
                       step="0.1"
                       placeholder="-90 a 90"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -108,7 +111,9 @@ const StepOneForm = ({ form }: StepOneFormProps) => {
                       step="0.1"
                       placeholder="-180 a 180"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -127,7 +132,11 @@ const StepOneForm = ({ form }: StepOneFormProps) => {
                   <Input
                     type="datetime-local"
                     {...field}
-                    value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                    value={
+                      field.value
+                        ? new Date(field.value).toISOString().slice(0, 16)
+                        : ''
+                    }
                     onChange={(e) => field.onChange(new Date(e.target.value))}
                   />
                 </FormControl>

@@ -18,16 +18,15 @@ interface TsunamiFormProps {
   onLocationUpdate: (location: Location) => void;
 }
 
-const TsunamiForm = ({ selectedLocation, onLocationUpdate }: TsunamiFormProps) => {
+const TsunamiForm = ({
+  selectedLocation,
+  onLocationUpdate,
+}: TsunamiFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [ref, bounds] = useMeasure();
-  
-  const {
-    isLoading,
-    calculationResult,
-    sourceParams,
-    calculateTsunami
-  } = useTsunamiCalculator();
+
+  const { isLoading, calculationResult, sourceParams, calculateTsunami } =
+    useTsunamiCalculator();
 
   const form = useForm<GenerateFormType>({
     resolver: zodResolver(generateFormSchema),
@@ -69,7 +68,7 @@ const TsunamiForm = ({ selectedLocation, onLocationUpdate }: TsunamiFormProps) =
   const handleSubmit = async (values: GenerateFormType) => {
     try {
       await calculateTsunami(values);
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     } catch (error) {
       // Error handling is done in the hook
     }
@@ -91,7 +90,10 @@ const TsunamiForm = ({ selectedLocation, onLocationUpdate }: TsunamiFormProps) =
   return (
     <>
       <MotionConfig transition={{ duration: 0.5, type: 'spring', bounce: 0 }}>
-        <motion.div animate={{ height: bounds.height }} className="relative overflow-hidden">
+        <motion.div
+          animate={{ height: bounds.height }}
+          className="relative overflow-hidden"
+        >
           <div ref={ref}>
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
@@ -112,7 +114,7 @@ const TsunamiForm = ({ selectedLocation, onLocationUpdate }: TsunamiFormProps) =
           type="button"
           variant="outline"
           disabled={currentStep === 0}
-          onClick={() => setCurrentStep(prev => prev - 1)}
+          onClick={() => setCurrentStep((prev) => prev - 1)}
         >
           Anterior
         </Button>

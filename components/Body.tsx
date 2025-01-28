@@ -8,7 +8,9 @@ import { Toaster } from 'react-hot-toast';
 import { Location } from '@/utils/types';
 
 export default function Page() {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
 
   return (
     <motion.div
