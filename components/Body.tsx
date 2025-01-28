@@ -3,7 +3,8 @@
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
+import useMeasure from 'react-use-measure';
 import {
   Form,
   FormControl,
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import TsunamiMap from '@/components/Tsunami';
@@ -25,6 +26,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+// Schema definition
 const generateFormSchema = z.object({
   magnitude: z
     .number()
@@ -45,6 +47,7 @@ const generateFormSchema = z.object({
   datetime: z.date(),
 });
 
+// Interfaces
 interface CalculationResponse {
   id: string;
   calculation_time_ms: number;
@@ -55,6 +58,16 @@ interface CalculationResponse {
   };
 }
 
+interface SourceParameters {
+  Largo: number;
+  Ancho: number;
+  Dislocación: number;
+  Momento_sísmico: number;
+  lat0: number;
+  lon0: number;
+}
+
+// Utility functions
 const getRiskLevelClass = (level: string) => {
   const levels: Record<string, string> = {
     Bajo: 'bg-green-50 text-green-700',
@@ -70,16 +83,24 @@ const formatCoordinate = (value: number, decimals: number = 6): number => {
 };
 
 const Body = () => {
+  // State management
+  const [currentStep, setCurrentStep] = useState(0);
+  const [ref, bounds] = useMeasure();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [calculationResult, setCalculationResult] =
     useState<CalculationResponse | null>(null);
+  const [sourceParams, setSourceParams] = useState<SourceParameters | null>(
+    null,
+  );
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+
   const router = useRouter();
 
+  // Form initialization
   const form = useForm<z.infer<typeof generateFormSchema>>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
@@ -91,6 +112,7 @@ const Body = () => {
     },
   });
 
+  // Location handling
   const handleLocationSelect = useCallback(
     (lat: number, lng: number) => {
       const formattedLat = formatCoordinate(lat);
@@ -108,11 +130,11 @@ const Body = () => {
     [form],
   );
 
-  // Watch form values for latitude and longitude
+  // Watch form values
   const latitude = form.watch('latitude');
   const longitude = form.watch('longitude');
 
-  // Update map when form values change directly
+  // Update map on form changes
   useEffect(() => {
     if (
       selectedLocation === null ||
@@ -126,12 +148,43 @@ const Body = () => {
     }
   }, [latitude, longitude]);
 
+  // API calls
+  const fetchSourceParameters = async (
+    values: z.infer<typeof generateFormSchema>,
+  ) => {
+    try {
+      const response = await fetch('http://192.168.18.218:5000/api/tsunami/source_params', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Mw: values.magnitude,
+          h: values.depth,
+          lat0: values.latitude,
+          lon0: values.longitude,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Error fetching source parameters');
+      const data = await response.json();
+      setSourceParams(data);
+      setCurrentStep(1);
+    } catch (error) {
+      toast.error('Error fetching source parameters');
+      console.error(error);
+      throw error;
+    }
+  };
+
   const handleSubmit = useCallback(
     async (values: z.infer<typeof generateFormSchema>) => {
       setIsLoading(true);
       setError(null);
 
       try {
+        // First get source parameters
+        await fetchSourceParameters(values);
+
+        // Then calculate tsunami
         const response = await fetch('/api/calculate-tsunami', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -147,6 +200,7 @@ const Body = () => {
 
         const data: CalculationResponse = await response.json();
         setCalculationResult(data);
+        setCurrentStep(2);
 
         va.track('Tsunami Calculado', {
           magnitude: values.magnitude,
@@ -177,34 +231,27 @@ const Body = () => {
     [],
   );
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex justify-center items-center flex-col w-full lg:p-0 p-4 mb-0"
-    >
-      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
-        <div className="col-span-1">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-blue-50 p-4 rounded-lg mb-6"
-              >
-                <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                  Simulador de tsunami de origen lejano
-                </h2>
-                <p className="text-blue-600">
-                  Complete los datos del evento sísmico o seleccione una
-                  ubicación en el mapa.
-                </p>
-              </motion.div>
+  // Step content
+  const content = useMemo(() => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h2 className="text-xl font-semibold text-blue-800 mb-2">
+                Paso 1: Parámetros Iniciales
+              </h2>
+              <p className="text-blue-600">
+                Ingrese los datos del evento sísmico o seleccione una ubicación
+                en el mapa.
+              </p>
+            </div>
 
-              <motion.div whileHover={{ scale: 1.01 }} className="space-y-6">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="magnitude"
@@ -220,7 +267,6 @@ const Body = () => {
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value))
                           }
-                          className="focus:ring-2 focus:ring-blue-500"
                         />
                       </FormControl>
                       <FormDescription>
@@ -333,87 +379,163 @@ const Body = () => {
                     </FormItem>
                   )}
                 />
-              </motion.div>
+              </form>
+            </Form>
+          </div>
+        );
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h2 className="text-xl font-semibold text-green-800 mb-2">
+                Paso 2: Parámetros de la Fuente
+              </h2>
+              <p className="text-green-600">
+                Revisión de los parámetros calculados para la fuente sísmica.
+              </p>
+            </div>
+
+            {sourceParams && (
+              <div className="grid grid-cols-2 gap-4 p-4 bg-white rounded-lg shadow">
+                <div className="space-y-2">
+                  <p className="font-semibold">Largo:</p>
+                  <p>{sourceParams.Largo.toFixed(2)} km</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-semibold">Ancho:</p>
+                  <p>{sourceParams.Ancho.toFixed(2)} km</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-semibold">Dislocación:</p>
+                  <p>{sourceParams.Dislocación.toFixed(2)} m</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-semibold">Momento sísmico:</p>
+                  <p>{sourceParams.Momento_sísmico.toFixed(2)}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h2 className="text-xl font-semibold text-purple-800 mb-2">
+                Paso 3: Resultados del Tsunami
+              </h2>
+              <p className="text-purple-600">
+                Resultados finales de la simulación del tsunami.
+              </p>
+            </div>
+
+            {calculationResult && (
+              <Alert
+                className={getRiskLevelClass(
+                  calculationResult.result.risk_level,
+                )}
               >
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 transition-colors"
-                >
-                  {isLoading ? (
-                    <LoadingDots color="white" />
-                  ) : (
-                    'Calcular Tsunami'
-                  )}
-                </Button>
-              </motion.div>
-            </form>
-          </Form>
+                <AlertTitle className="text-lg font-bold">
+                  Resultados de la Simulación
+                </AlertTitle>
+                <AlertDescription className="mt-2">
+                  <div className="space-y-2">
+                    <p className="flex items-center">
+                      <span className="font-semibold mr-2">
+                        Altura estimada:
+                      </span>
+                      {calculationResult.result.estimated_height} metros
+                    </p>
+                    <p className="flex items-center">
+                      <span className="font-semibold mr-2">
+                        Tiempo de llegada:
+                      </span>
+                      {format(
+                        new Date(calculationResult.result.arrival_time),
+                        "d 'de' MMMM 'a las' HH:mm",
+                        { locale: es },
+                      )}
+                    </p>
+                    <p className="flex items-center">
+                      <span className="font-semibold mr-2">
+                        Nivel de riesgo:
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full ${getRiskLevelClass(
+                          calculationResult.result.risk_level,
+                        )}`}
+                      >
+                        {calculationResult.result.risk_level}
+                      </span>
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  }, [currentStep, sourceParams, calculationResult, form]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex justify-center items-center flex-col w-full lg:p-0 p-4 mb-0"
+    >
+      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+        <div className="col-span-1">
+          <MotionConfig
+            transition={{ duration: 0.5, type: 'spring', bounce: 0 }}
+          >
+            <motion.div
+              animate={{ height: bounds.height }}
+              className="relative overflow-hidden"
+            >
+              <div ref={ref}>
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.div
+                    key={currentStep}
+                    initial={{ x: '110%', opacity: 0 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ x: '-110%', opacity: 0 }}
+                  >
+                    {content}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </MotionConfig>
+
+          <motion.div layout className="flex justify-between mt-6 gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={currentStep === 0}
+              onClick={() => setCurrentStep((prev) => prev - 1)}
+            >
+              Anterior
+            </Button>
+            <Button
+              type="button"
+              disabled={currentStep === 2 || isLoading}
+              onClick={() => {
+                if (currentStep < 2) {
+                  form.handleSubmit(handleSubmit)();
+                }
+              }}
+            >
+              {isLoading ? <LoadingDots color="white" /> : 'Continuar'}
+            </Button>
+          </motion.div>
         </div>
 
         <div className="col-span-1">
-          <AnimatePresence>
-            {calculationResult && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mb-6"
-              >
-                <Alert
-                  className={getRiskLevelClass(
-                    calculationResult.result.risk_level,
-                  )}
-                >
-                  <AlertTitle className="text-lg font-bold">
-                    Resultados de la Simulación
-                  </AlertTitle>
-                  <AlertDescription className="mt-2">
-                    <div className="space-y-2">
-                      <p className="flex items-center">
-                        <span className="font-semibold mr-2">
-                          Altura estimada:
-                        </span>
-                        {calculationResult.result.estimated_height} metros
-                      </p>
-                      <p className="flex items-center">
-                        <span className="font-semibold mr-2">
-                          Tiempo de llegada:
-                        </span>
-                        {format(
-                          new Date(calculationResult.result.arrival_time),
-                          "d 'de' MMMM 'a las' HH:mm",
-                          { locale: es },
-                        )}
-                      </p>
-                      <p className="flex items-center">
-                        <span className="font-semibold mr-2">
-                          Nivel de riesgo:
-                        </span>
-                        <span
-                          className={`px-2 py-1 rounded-full ${getRiskLevelClass(calculationResult.result.risk_level)}`}
-                        >
-                          {calculationResult.result.risk_level}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        Tiempo de cálculo:{' '}
-                        {(calculationResult.calculation_time_ms / 1000).toFixed(
-                          2,
-                        )}{' '}
-                        segundos
-                      </p>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
