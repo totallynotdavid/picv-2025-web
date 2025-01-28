@@ -17,7 +17,7 @@ export const useTsunamiCalculator = () => {
   const fetchSourceParameters = async (values: GenerateFormType) => {
     try {
       const response = await fetch(
-        'http://172.16.57.18:5000/api/tsunami/source_params',
+        `${process.env.NEXT_PUBLIC_API_URL}/api/tsunami/source_params`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
