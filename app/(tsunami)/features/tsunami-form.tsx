@@ -9,7 +9,7 @@ import LoadingDots from '@/app/components/ui/loadingdots';
 import { generateFormSchema, GenerateFormType } from '@/app/utils/schema';
 import { useTsunamiCalculator } from '@/app/components/useTsunamiCalculator';
 import { Location } from '@/app/utils/types';
-import { formatCoordinate } from '@/app/utils/utils';
+import { formatCoordinate } from '@/lib/utils';
 import StepOneForm from '@/app/components/tsunami/StepOneForm';
 import SourceParameters from '@/app/components/tsunami/SourceParameters';
 import TsunamiResults from '@/app/components/tsunami/TsunamiResults';

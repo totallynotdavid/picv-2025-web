@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Alert, AlertTitle, AlertDescription } from '@/app/components/ui/alert';
 import { CalculationResponse } from '@/app/utils/types';
-import { getRiskLevelClass } from '@/app/utils/utils';
+import { getRiskLevelClass } from '@/lib/utils';
 
 interface TsunamiResultsProps {
   result: CalculationResponse | null;
