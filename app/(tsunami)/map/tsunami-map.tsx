@@ -10,7 +10,7 @@ const MapContent = dynamic(
         Cargando mapa...
       </div>
     ),
-  }
+  },
 );
 
 export const TsunamiMap = (props: {

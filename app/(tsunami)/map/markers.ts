@@ -22,12 +22,12 @@ export class MapMarkers {
     this.clearMarkers();
 
     this.marker = L.marker([lat, lng]).addTo(this.map);
-    
+
     const bounds = L.latLngBounds(
       [lat - 0.5, lng - 0.5],
-      [lat + 0.5, lng + 0.5]
+      [lat + 0.5, lng + 0.5],
     );
-    
+
     this.rectangle = L.rectangle(bounds, {
       color: '#2563eb',
       weight: 2,

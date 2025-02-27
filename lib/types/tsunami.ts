@@ -83,3 +83,10 @@ export interface CalculationResponse {
   };
   calculation_time_ms: number;
 }
+
+export declare namespace Tsunami {
+  interface Location {
+    lat: number;
+    lng: number;
+  }
+}

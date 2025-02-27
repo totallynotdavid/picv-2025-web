@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
+import type { Tsunami } from '@/lib/types/tsunami';
+
 import L from 'leaflet';
 import { MapMarkers } from '@/app/(tsunami)/map/markers';
 import { config } from '@/lib/config';
@@ -15,29 +17,32 @@ export const MapContent = ({
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<MapMarkers | null>(null);
 
-  const initializeMap = useCallback((container: HTMLDivElement) => {
-    const map = L.map(container, {
-      center: [20, 0],
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 18,
-      zoomControl: false,
-    });
+  const initializeMap = useCallback(
+    (container: HTMLDivElement) => {
+      const map = L.map(container, {
+        center: [20, 0],
+        zoom: 2,
+        minZoom: 2,
+        maxZoom: 18,
+        zoomControl: false,
+      });
 
-    L.tileLayer(config.NEXT_PUBLIC_MAP_TILE_URL, {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(map);
+      L.tileLayer(config.NEXT_PUBLIC_MAP_TILE_URL, {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors',
+      }).addTo(map);
 
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    markersRef.current = new MapMarkers(map);
+      L.control.zoom({ position: 'topright' }).addTo(map);
+      markersRef.current = new MapMarkers(map);
 
-    map.on('click', (e) => {
-      onLocationSelect(e.latlng.lat, e.latlng.lng);
-    });
+      map.on('click', (e) => {
+        onLocationSelect(e.latlng.lat, e.latlng.lng);
+      });
 
-    return map;
-  }, [onLocationSelect]);
+      return map;
+    },
+    [onLocationSelect],
+  );
 
   useEffect(() => {
     const container = document.createElement('div');
@@ -55,7 +60,7 @@ export const MapContent = ({
     if (selectedLocation && mapRef.current) {
       markersRef.current?.updateMarkers(
         selectedLocation.lat,
-        selectedLocation.lng
+        selectedLocation.lng,
       );
       mapRef.current.flyTo([selectedLocation.lat, selectedLocation.lng], 8, {
         duration: 1.5,

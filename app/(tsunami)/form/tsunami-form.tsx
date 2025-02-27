@@ -4,7 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import useMeasure from 'react-use-measure';
 import { Button } from '@/app/_components/ui/templates/button';
-import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/app/_components/ui/templates/alert';
 import LoadingDots from '@/app/_components/ui/templates/loadingdots';
 import { generateFormSchema, GenerateFormType } from '@/lib/schemas';
 import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
@@ -36,7 +40,7 @@ const TsunamiForm = ({
     calculationResult,
     estimatedTimeRemaining,
     calculateTsunami,
-    reset
+    reset,
   } = useTsunamiCalculator();
 
   const form = useForm<GenerateFormType>({
@@ -107,10 +111,10 @@ const TsunamiForm = ({
         return (
           <>
             <SourceParameters parameters={sourceParams} />
-            <ProgressIndicator 
-              stage={currentStage} 
-              progress={progress} 
-              estimatedTimeRemaining={estimatedTimeRemaining} 
+            <ProgressIndicator
+              stage={currentStage}
+              progress={progress}
+              estimatedTimeRemaining={estimatedTimeRemaining}
             />
           </>
         );
@@ -129,7 +133,7 @@ const TsunamiForm = ({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       <MotionConfig transition={{ duration: 0.5, type: 'spring', bounce: 0 }}>
         <motion.div
           animate={{ height: bounds.height }}
@@ -163,7 +167,7 @@ const TsunamiForm = ({
         >
           Anterior
         </Button>
-        
+
         {currentStep === 2 ? (
           <Button
             type="button"

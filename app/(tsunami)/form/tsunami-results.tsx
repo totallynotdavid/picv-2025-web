@@ -1,17 +1,18 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/app/_components/ui/templates/alert';
 import { CalculationResponse } from '@/lib/types/tsunami';
 import { getRiskLevelClass } from '@/lib/utils';
+import { formatArrivalTime, formatRiskLevel } from '@/lib/utils/formatters';
 
 interface TsunamiResultsProps {
   result: CalculationResponse | null;
 }
 
 const TsunamiResults = ({ result }: TsunamiResultsProps) => {
-  if (!result) {
-    return null;
-  }
+  if (!result) return null;
 
   return (
     <div className="space-y-6">
@@ -36,20 +37,14 @@ const TsunamiResults = ({ result }: TsunamiResultsProps) => {
             </p>
             <p className="flex items-center">
               <span className="font-semibold mr-2">Tiempo de llegada:</span>
-              {format(
-                new Date(result.result.arrival_time),
-                "d 'de' MMMM 'a las' HH:mm",
-                { locale: es },
-              )}
+              {formatArrivalTime(result.result.arrival_time)}
             </p>
             <p className="flex items-center">
               <span className="font-semibold mr-2">Nivel de riesgo:</span>
               <span
-                className={`px-2 py-1 rounded-full ${getRiskLevelClass(
-                  result.result.risk_level,
-                )}`}
+                className={`px-2 py-1 rounded-full ${getRiskLevelClass(result.result.risk_level)}`}
               >
-                {result.result.risk_level}
+                {formatRiskLevel(result.result.risk_level)}
               </span>
             </p>
             <p className="flex items-center text-sm text-gray-600">

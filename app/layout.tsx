@@ -1,17 +1,14 @@
-import Navbar from '@/app/_components/layout/navbar';
-import './globals.css';
+import { Navbar } from '@/app/_components/layout/navbar';
+import '@/app/globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Footer from '@/app/_components/layout/footer';
-import { Analytics } from '@vercel/analytics/react';
-import PlausibleProvider from 'next-plausible';
 
 const inter = Inter({ subsets: ['latin'] });
 
 let title = 'Pronóstico de tsunamis: TSDHN';
 let description = 'Pronóstico de tsunamis: TSDHN en 10 minutos';
 let url = 'https://tsdhn.vercel.app/';
-let ogimage = 'https://www.qrgpt.io/og-image.png';
 let sitename = 'TSDHN';
 
 export const metadata: Metadata = {
@@ -22,7 +19,6 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
   },
   openGraph: {
-    images: [ogimage],
     title,
     description,
     url: url,
@@ -32,7 +28,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    images: [ogimage],
     title,
     description,
   },
@@ -45,15 +40,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <head>
-        <PlausibleProvider domain="tsdhn.vercel.app" />
-      </head>
       <body className={inter.className}>
         <Navbar />
         <main className="flex flex-col justify-center items-center">
           {children}
         </main>
-        <Analytics />
         <Footer />
       </body>
     </html>
