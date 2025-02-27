@@ -1,4 +1,4 @@
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/app/components/ui/progress';
 
 interface ProgressIndicatorProps {
   stage: 'idle' | 'calculating' | 'travelTimes' | 'processing' | 'complete' | 'error';

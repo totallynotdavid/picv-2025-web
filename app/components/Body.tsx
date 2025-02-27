@@ -2,10 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import TsunamiForm from '@/components/tsunami/TsunamiForm';
-import TsunamiMap from '@/components/Tsunami';
+import TsunamiForm from '@/app/components/tsunami/TsunamiForm';
+import TsunamiMap from '@/app/components/Tsunami';
 import { Toaster } from 'react-hot-toast';
-import { Location } from '@/utils/types';
+import { Location } from '@/app/utils/types';
 
 export default function Page() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(

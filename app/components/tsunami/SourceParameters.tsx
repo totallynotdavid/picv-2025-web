@@ -1,4 +1,4 @@
-import { SourceParameters as SourceParametersType } from '@/utils/types';
+import { SourceParameters as SourceParametersType } from '@/app/utils/types';
 
 interface SourceParametersProps {
   parameters: SourceParametersType | null;
