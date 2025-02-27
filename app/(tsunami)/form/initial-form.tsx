@@ -1,11 +1,6 @@
-import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/app/_components/ui/templates/form';
-import { GenerateFormData } from '../types';
+import { InitialFormProps } from '@/lib/types/form';
 import { FormInput } from '@/app/(tsunami)/form/form-input';
-
-interface InitialFormProps {
-  form: UseFormReturn<GenerateFormData>;
-}
 
 export const InitialForm = ({ form }: InitialFormProps) => (
   <div className="space-y-6">

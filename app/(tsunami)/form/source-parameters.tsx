@@ -1,8 +1,4 @@
-import { SourceParameters as SourceParamsType } from '../types';
-
-interface SourceParametersProps {
-  parameters: SourceParamsType | null;
-}
+import { SourceParametersProps } from '@/lib/types/tsunami';
 
 export const SourceParameters = ({ parameters }: SourceParametersProps) => {
   if (!parameters) return null;

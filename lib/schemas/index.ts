@@ -18,7 +18,6 @@ export const generateFormSchema = z.object({
     .min(-180, { message: 'La longitud mínima es -180' })
     .max(180, { message: 'La longitud máxima es 180' }),
   datetime: z.preprocess((arg) => {
-    // Convert string or Date to Date object
     if (typeof arg === 'string' || arg instanceof Date) {
       return new Date(arg);
     }

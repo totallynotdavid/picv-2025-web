@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { GenerateFormData, JobStatus, SourceParameters } from '../types';
+import { JobStatus, SourceParameters } from '@/lib/types/tsunami';
+import { GenerateFormData } from '@/lib/types/form';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -62,7 +63,6 @@ export const useTsunamiCalculator = () => {
       }));
 
       try {
-        // Step 1: Calculate source parameters
         const calculateRes = await fetch(`${API_BASE_URL}/calculate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,6 @@ export const useTsunamiCalculator = () => {
         const sourceParams = await calculateRes.json();
         setState((prev) => ({ ...prev, sourceParams, progress: 30 }));
 
-        // Step 2: Calculate tsunami travel times
         const travelRes = await fetch(`${API_BASE_URL}/tsunami-travel-times`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -89,7 +88,6 @@ export const useTsunamiCalculator = () => {
 
         setState((prev) => ({ ...prev, progress: 50 }));
 
-        // Step 3: Run TSDHN simulation
         const jobRes = await fetch(`${API_BASE_URL}/run-tsdhn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -3,7 +3,7 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/app/_components/ui/templates/alert';
-import { JobStatus } from '../types';
+import { JobStatus } from '@/lib/types';
 
 interface TsunamiResultsProps {
   jobStatus: JobStatus | null;

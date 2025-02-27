@@ -1,22 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/app/_components/ui/templates/button';
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from '@/app/_components/ui/templates/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import { Form } from '@/app/_components/ui/templates/form';
 import { z } from 'zod';
 import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
 import { InitialForm } from './initial-form';
 import { SourceParameters } from './source-parameters';
 import { TsunamiResults } from './tsunami-results';
 import { ProgressIndicator } from '@/app/_components/ui/progress-indicator';
-import { Location, GenerateFormData } from '../types';
+import { GenerateFormData, TsunamiFormProps } from '@/lib/types/form';
 
-// Form validation schema
 const generateFormSchema = z.object({
   magnitude: z.number().min(6.5, { message: 'La magnitud mínima es 6.5 Mw' }),
   depth: z.number().min(0, { message: 'La profundidad no puede ser negativa' }),
@@ -25,27 +21,9 @@ const generateFormSchema = z.object({
   datetime: z.date(),
 });
 
-interface TsunamiFormProps {
-  selectedLocation: Location | null;
-  onLocationUpdate: (location: Location) => void;
-}
-
-export const TsunamiForm = ({
-  selectedLocation,
-  onLocationUpdate,
-}: TsunamiFormProps) => {
+export const TsunamiForm = ({ selectedLocation }: TsunamiFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const {
-    isLoading,
-    error,
-    currentStage,
-    progress,
-    sourceParams,
-    jobStatus,
-    calculateTsunami,
-    reset,
-  } = useTsunamiCalculator();
-
+  const { isLoading, error, currentStage, progress, sourceParams, jobStatus, calculateTsunami, reset } = useTsunamiCalculator();
   const form = useForm<GenerateFormData>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
@@ -53,11 +31,10 @@ export const TsunamiForm = ({
       depth: 10.0,
       latitude: -20.5,
       longitude: -70.5,
-      datetime: new Date(new Date().toISOString().slice(0, 16)),
+      datetime: new Date(),
     },
   });
 
-  // Update form when location is selected on the map
   useEffect(() => {
     if (selectedLocation) {
       form.setValue('latitude', selectedLocation.lat);
@@ -65,7 +42,6 @@ export const TsunamiForm = ({
     }
   }, [selectedLocation, form]);
 
-  // Move to results step when calculation is complete
   useEffect(() => {
     if (currentStage === 'complete') setCurrentStep(2);
   }, [currentStage]);
@@ -84,52 +60,48 @@ export const TsunamiForm = ({
         </Alert>
       )}
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ x: '100%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: '-100%', opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {currentStep === 0 && <InitialForm form={form} />}
-          {currentStep === 1 && (
-            <>
-              <SourceParameters parameters={sourceParams} />
-              <ProgressIndicator stage={currentStage} progress={progress} />
-            </>
-          )}
-          {currentStep === 2 && <TsunamiResults jobStatus={jobStatus} />}
-        </motion.div>
-      </AnimatePresence>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-100%', opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {currentStep === 0 && <InitialForm form={form} />}
+              {currentStep === 1 && (
+                <>
+                  <SourceParameters parameters={sourceParams} />
+                  <ProgressIndicator stage={currentStage} progress={progress} />
+                </>
+              )}
+              {currentStep === 2 && <TsunamiResults jobStatus={jobStatus} />}
+            </motion.div>
+          </AnimatePresence>
 
-      <div className="flex justify-between gap-4 mt-6">
-        <Button
-          variant="outline"
-          disabled={currentStep === 0 || isLoading}
-          onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
-        >
-          Anterior
-        </Button>
+          <div className="flex justify-between gap-4 mt-6">
+            <Button
+              variant="outline"
+              disabled={currentStep === 0 || isLoading}
+              onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
+            >
+              Anterior
+            </Button>
 
-        {currentStep === 2 ? (
-          <Button
-            onClick={() => {
-              reset();
-              setCurrentStep(0);
-            }}
-          >
-            Nueva simulación
-          </Button>
-        ) : (
-          <Button
-            onClick={form.handleSubmit(handleSubmit)}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Procesando...' : 'Continuar'}
-          </Button>
-        )}
-      </div>
+            {currentStep === 2 ? (
+              <Button onClick={() => { reset(); setCurrentStep(0); }}>
+                Nueva simulación
+              </Button>
+            ) : (
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Procesando...' : 'Continuar'}
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };

@@ -5,12 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format coordinate to have fixed decimal places
 export const formatCoordinate = (value: number): number => {
   return parseFloat(value.toFixed(4));
 };
 
-// Get appropriate CSS class based on risk level
 export const getRiskLevelClass = (riskLevel: string): string => {
   switch (riskLevel.toLowerCase()) {
     case 'bajo':
@@ -26,7 +24,6 @@ export const getRiskLevelClass = (riskLevel: string): string => {
   }
 };
 
-// Format date for API
 export const formatDateForApi = (date: Date): { dia: string; hhmm: string } => {
   const day = date.getDate().toString().padStart(2, '0');
   const hours = date.getHours().toString().padStart(2, '0');

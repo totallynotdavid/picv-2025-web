@@ -1,15 +1,5 @@
 import { Progress } from '@/app/_components/ui/templates/progress';
-
-interface ProgressIndicatorProps {
-  stage:
-    | 'idle'
-    | 'calculating'
-    | 'travelTimes'
-    | 'processing'
-    | 'complete'
-    | 'error';
-  progress: number;
-}
+import { ProgressIndicatorProps } from '@/lib/types/index';
 
 const stageMessages = {
   calculating: 'Calculando parámetros iniciales...',

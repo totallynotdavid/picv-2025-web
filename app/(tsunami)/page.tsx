@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { TsunamiForm } from '@/app/(tsunami)/form/tsunami-form';
 import TsunamiMap from '@/app/(tsunami)/map/tsunami-map';
 import { Toaster } from 'react-hot-toast';
-import { Location } from '@/app/(tsunami)/types';
+import { Location } from '@/lib/types/tsunami';
 
 export default function TsunamiPage() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(

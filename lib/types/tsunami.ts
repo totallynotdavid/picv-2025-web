@@ -3,18 +3,15 @@ export interface Location {
   lng: number;
 }
 
-// Source Parameters after calculation
 export interface SourceParameters {
-  Largo: number;
-  Ancho: number;
-  Dislocación: number;
-  Momento_sísmico: number;
-  tsunami_warning?: string;
+  length: number;
+  width: number;
+  dislocation: number;
+  seismic_moment: number;
   lat0: number;
   lon0: number;
 }
 
-// Response from the first API endpoint (/calculate)
 export interface CalculateResponse {
   length: number;
   width: number;
@@ -42,7 +39,6 @@ export interface CalculateResponse {
   }[];
 }
 
-// Travel Time Response from the second API endpoint (/tsunami-travel-times)
 export interface TravelTimeResponse {
   arrival_times: Record<string, string>;
   distances: Record<string, number>;
@@ -56,25 +52,22 @@ export interface TravelTimeResponse {
   };
 }
 
-// Job Response from the third API endpoint (/run-tsdhn)
 export interface JobResponse {
   status: string;
   job_id: string;
   message: string;
 }
 
-// Job Status Response from the fourth API endpoint (/job-status/{job_id})
 export interface JobStatus {
   status: 'queued' | 'running' | 'completed' | 'failed';
   details: string;
-  error: string | null;
+  error: string | undefined;
   created_at: string;
   started_at: string;
   ended_at: string | null;
-  download_url: string | null;
+  download_url: string | undefined;
 }
 
-// Final calculation result (simplified for the UI)
 export interface CalculationResponse {
   result: {
     estimated_height: number;
@@ -85,6 +78,7 @@ export interface CalculationResponse {
 }
 
 export declare namespace Tsunami {
+  // eslint-disable-next-line no-unused-vars
   interface Location {
     lat: number;
     lng: number;
@@ -98,4 +92,8 @@ export interface Location {
 
 export interface TsunamiResultsProps {
   jobStatus: JobStatus | null;
+}
+
+export interface SourceParametersProps {
+  parameters: SourceParameters | null;
 }
