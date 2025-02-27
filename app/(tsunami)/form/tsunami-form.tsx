@@ -10,10 +10,10 @@ import { generateFormSchema, GenerateFormType } from '@/lib/schemas';
 import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
 import { Location } from '@/lib/types/tsunami';
 import { formatCoordinate } from '@/lib/utils';
-import StepOneForm from '@/app/(tsunami)/features/step-one-form';
-import SourceParameters from '@/app/(tsunami)/features/source-parameters';
-import TsunamiResults from '@/app/(tsunami)/features/tsunami-results';
-import ProgressIndicator from '@/app/(tsunami)/features/progress-indicator';
+import StepOneForm from '@/app/(tsunami)/form/initial-form';
+import SourceParameters from '@/app/(tsunami)/form/source-parameters';
+import TsunamiResults from '@/app/(tsunami)/form/tsunami-results';
+import ProgressIndicator from '@/app/_components/ui/progress-indicator';
 
 interface TsunamiFormProps {
   selectedLocation: Location | null;

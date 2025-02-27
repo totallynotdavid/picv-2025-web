@@ -1,4 +1,3 @@
-// Existing Location type (referenced in the code)
 export interface Location {
   lat: number;
   lng: number;

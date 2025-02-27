@@ -1,87 +1,69 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { usePathname, useSearchParams } from 'next/navigation';
+import clsx from 'clsx';
 
-const Navbar = () => {
-  const [state, setState] = useState(false);
-
+export const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Add closing the navbar menu when navigating
-    const handleState = () => {
+    const handleRouteChange = () => {
+      setIsOpen(false);
       document.body.classList.remove('overflow-hidden');
-      setState(false);
     };
 
-    handleState();
-  }, [pathname, searchParams]);
+    handleRouteChange();
+  }, [pathname]);
 
-  const handleNavMenu = () => {
-    setState(!state);
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
     document.body.classList.toggle('overflow-hidden');
   };
 
   return (
-    <header>
-      <nav
-        className={`bg-white w-full md:static md:text-sm ${
-          state ? 'fixed z-10 h-full' : ''
-        }`}
-      >
-        <div className="custom-screen items-center mx-auto md:flex">
-          <div className="flex items-center justify-between py-3 md:py-5 md:block">
-            <Link href="/" className="flex items-center gap-3">
-              <Image src="/wave.svg" alt="logo" width={30} height={30} />
-              <div className="font-bold text-lg">TSDHN</div>
+    <header className="bg-white shadow-sm">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/wave.svg" alt="Logo" width={32} height={32} priority />
+            <span className="text-xl font-bold text-gray-900">TSDHN</span>
+          </Link>
+          
+          <div className="hidden md:flex md:space-x-8">
+            <Link
+              href="/"
+              className="text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              Inicio
             </Link>
-            <div className="md:hidden">
-              <button
-                role="button"
-                aria-label="Open the menu"
-                className="text-gray-500 hover:text-gray-800"
-                onClick={handleNavMenu}
+          </div>
+
+          <div className="md:hidden">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900"
+              aria-label="Toggle menu"
+            >
+              <svg
+                className={clsx('h-6 w-6 transition-transform', isOpen && 'rotate-180')}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                {state ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                {isOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                    />
-                  </svg>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
-              </button>
-            </div>
+              </svg>
+            </button>
           </div>
         </div>
       </nav>
     </header>
   );
 };
-
-export default Navbar;

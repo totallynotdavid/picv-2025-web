@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import TsunamiForm from '@/app/(tsunami)/features/tsunami-form';
-import TsunamiMap from '@/app/(tsunami)/features/map/tsunami-map';
+import TsunamiForm from '@/app/(tsunami)/form/tsunami-form';
+import { TsunamiMap } from '@/app/(tsunami)/map/tsunami-map';
 import { Toaster } from 'react-hot-toast';
 import { Location } from '@/lib/types/tsunami';
 
