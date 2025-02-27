@@ -1,4 +1,4 @@
-import { SourceParameters as SourceParametersType } from '@/app/utils/types';
+import { SourceParameters as SourceParametersType } from '@/lib/types/tsunami';
 
 interface SourceParametersProps {
   parameters: SourceParametersType | null;

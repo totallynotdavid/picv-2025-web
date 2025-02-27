@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { GenerateFormType } from '@/app/utils/schema';
-import { SourceParameters, CalculationResponse, TravelTimeResponse, JobResponse, JobStatus } from '@/app/utils/types';
+import { GenerateFormType } from '@/lib/schemas';
+import { SourceParameters, CalculationResponse, TravelTimeResponse, JobResponse, JobStatus } from '@/lib/types/tsunami';
 
 // Polling interval in milliseconds
 const POLLING_INTERVAL = 10000; // 10 seconds

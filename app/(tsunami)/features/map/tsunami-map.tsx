@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap, Layer, LatLngBounds } from 'leaflet';
-import LeafletCSS from '@/app/components/LeafletCSS';
+import LeafletCSS from '@/app/_components/ui/leaflet-css';
 
 interface MapContentProps {
   onLocationSelect?: (lat: number, lng: number) => void;

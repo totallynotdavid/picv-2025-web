@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Alert, AlertTitle, AlertDescription } from '@/app/components/ui/alert';
-import { CalculationResponse } from '@/app/utils/types';
+import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import { CalculationResponse } from '@/lib/types/tsunami';
 import { getRiskLevelClass } from '@/lib/utils';
 
 interface TsunamiResultsProps {

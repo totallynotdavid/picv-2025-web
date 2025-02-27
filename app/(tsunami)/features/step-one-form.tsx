@@ -7,9 +7,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/app/components/ui/form';
-import { Input } from '@/app/components/ui/input';
-import { GenerateFormType } from '@/app/utils/schema';
+} from '@/app/_components/ui/templates/form';
+import { Input } from '@/app/_components/ui/templates/input';
+import { GenerateFormType } from '@/lib/schemas';
 
 interface StepOneFormProps {
   form: UseFormReturn<GenerateFormType>;

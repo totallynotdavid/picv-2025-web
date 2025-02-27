@@ -3,17 +3,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import useMeasure from 'react-use-measure';
-import { Button } from '@/app/components/ui/button';
-import { Alert, AlertTitle, AlertDescription } from '@/app/components/ui/alert';
-import LoadingDots from '@/app/components/ui/loadingdots';
-import { generateFormSchema, GenerateFormType } from '@/app/utils/schema';
-import { useTsunamiCalculator } from '@/app/components/useTsunamiCalculator';
-import { Location } from '@/app/utils/types';
+import { Button } from '@/app/_components/ui/templates/button';
+import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import LoadingDots from '@/app/_components/ui/templates/loadingdots';
+import { generateFormSchema, GenerateFormType } from '@/lib/schemas';
+import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
+import { Location } from '@/lib/types/tsunami';
 import { formatCoordinate } from '@/lib/utils';
-import StepOneForm from '@/app/components/tsunami/StepOneForm';
-import SourceParameters from '@/app/components/tsunami/SourceParameters';
-import TsunamiResults from '@/app/components/tsunami/TsunamiResults';
-import ProgressIndicator from '@/app/components/tsunami/ProgressIndicator';
+import StepOneForm from '@/app/(tsunami)/features/step-one-form';
+import SourceParameters from '@/app/(tsunami)/features/source-parameters';
+import TsunamiResults from '@/app/(tsunami)/features/tsunami-results';
+import ProgressIndicator from '@/app/(tsunami)/features/progress-indicator';
 
 interface TsunamiFormProps {
   selectedLocation: Location | null;
