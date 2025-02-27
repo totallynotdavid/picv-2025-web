@@ -1,5 +1,4 @@
 import { Progress } from '@/app/_components/ui/templates/progress';
-import { formatDuration } from '@/lib/utils/formatters';
 
 interface ProgressIndicatorProps {
   stage:
@@ -10,7 +9,6 @@ interface ProgressIndicatorProps {
     | 'complete'
     | 'error';
   progress: number;
-  estimatedTimeRemaining: number | null;
 }
 
 const stageMessages = {
@@ -21,10 +19,9 @@ const stageMessages = {
   error: 'Error en la simulación',
 };
 
-const ProgressIndicator = ({
+export const ProgressIndicator = ({
   stage,
   progress,
-  estimatedTimeRemaining,
 }: ProgressIndicatorProps) => {
   if (stage === 'idle') return null;
 
@@ -35,12 +32,6 @@ const ProgressIndicator = ({
         <span>{progress}%</span>
       </div>
       <Progress value={progress} className="h-2" />
-
-      {stage === 'processing' && estimatedTimeRemaining !== null && (
-        <p className="text-sm text-gray-500 mt-2">
-          Tiempo estimado restante: {formatDuration(estimatedTimeRemaining)}
-        </p>
-      )}
 
       {stage === 'processing' && (
         <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md mt-2">

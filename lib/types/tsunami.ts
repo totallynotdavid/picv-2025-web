@@ -90,3 +90,7 @@ export declare namespace Tsunami {
     lng: number;
   }
 }
+
+export interface TsunamiResultsProps {
+  jobStatus: JobStatus | null;
+}

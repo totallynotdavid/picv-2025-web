@@ -1,31 +1,28 @@
 'use client';
 
-import { useMap } from '../hooks/use-map';
 import { useEffect, useRef } from 'react';
-import { Location } from '@/lib/types/tsunami';
+import { useMap } from '@/app/(tsunami)/hooks/use-map';
 
-const TsunamiMap = ({
+export const TsunamiMap = ({
   selectedLocation,
   onLocationSelect,
 }: {
-  selectedLocation?: Location | null;
+  selectedLocation?: { lat: number; lng: number } | null;
   onLocationSelect: (lat: number, lng: number) => void;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { initializeMap, updateMarkers } = useMap(
-    selectedLocation || undefined,
-  );
+  const { initialize, updateMarkers, mapRef } = useMap();
 
   useEffect(() => {
-    if (containerRef.current && !containerRef.current.children.length) {
-      const map = initializeMap(containerRef.current);
+    if (containerRef.current && !mapRef.current) {
+      const map = initialize(containerRef.current);
       map.on('click', (e) => onLocationSelect(e.latlng.lat, e.latlng.lng));
     }
-  }, [initializeMap, onLocationSelect]);
+  }, [initialize, onLocationSelect]);
 
   useEffect(() => {
-    if (selectedLocation) {
-      updateMarkers(selectedLocation);
+    if (selectedLocation && mapRef.current) {
+      updateMarkers(selectedLocation.lat, selectedLocation.lng);
     }
   }, [selectedLocation, updateMarkers]);
 
@@ -37,5 +34,3 @@ const TsunamiMap = ({
     </div>
   );
 };
-
-export default TsunamiMap;

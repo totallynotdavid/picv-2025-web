@@ -3,71 +3,38 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/app/_components/ui/templates/alert';
-import { CalculationResponse } from '@/lib/types/tsunami';
-import { getRiskLevelClass } from '@/lib/utils';
-import { formatArrivalTime, formatRiskLevel } from '@/lib/utils/formatters';
+import { TsunamiResultsProps } from '@/lib/types/tsunami';
 
-interface TsunamiResultsProps {
-  result: CalculationResponse | null;
-}
-
-const TsunamiResults = ({ result }: TsunamiResultsProps) => {
-  if (!result) return null;
+export const TsunamiResults = ({ jobStatus }: TsunamiResultsProps) => {
+  if (!jobStatus) return null;
 
   return (
     <div className="space-y-6">
       <div className="bg-purple-50 p-4 rounded-lg">
         <h2 className="text-xl font-semibold text-purple-800 mb-2">
-          Paso 3: Resultados del Tsunami
+          Resultados de la simulación
         </h2>
-        <p className="text-purple-600">
-          Resultados finales de la simulación del tsunami.
-        </p>
       </div>
 
-      <Alert className={getRiskLevelClass(result.result.risk_level)}>
+      <Alert>
         <AlertTitle className="text-lg font-bold">
-          Resultados de la Simulación
+          Estado de la simulación
         </AlertTitle>
-        <AlertDescription className="mt-2">
-          <div className="space-y-2">
-            <p className="flex items-center">
-              <span className="font-semibold mr-2">Altura estimada:</span>
-              {result.result.estimated_height} metros
-            </p>
-            <p className="flex items-center">
-              <span className="font-semibold mr-2">Tiempo de llegada:</span>
-              {formatArrivalTime(result.result.arrival_time)}
-            </p>
-            <p className="flex items-center">
-              <span className="font-semibold mr-2">Nivel de riesgo:</span>
-              <span
-                className={`px-2 py-1 rounded-full ${getRiskLevelClass(result.result.risk_level)}`}
-              >
-                {formatRiskLevel(result.result.risk_level)}
-              </span>
-            </p>
-            <p className="flex items-center text-sm text-gray-600">
-              <span className="font-semibold mr-2">Tiempo de cálculo:</span>
-              {(result.calculation_time_ms / 1000).toFixed(2)} segundos
-            </p>
-          </div>
+        <AlertDescription className="mt-2 space-y-2">
+          <p>Estado: {jobStatus.status}</p>
+          {jobStatus.download_url && (
+            <a
+              href={jobStatus.download_url}
+              className="text-blue-600 hover:underline"
+            >
+              Descargar reporte
+            </a>
+          )}
+          {jobStatus.error && (
+            <p className="text-red-600">Error: {jobStatus.error}</p>
+          )}
         </AlertDescription>
       </Alert>
-
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-        <h3 className="text-md font-semibold text-blue-800 mb-2">
-          Recomendaciones de Seguridad
-        </h3>
-        <ul className="list-disc list-inside space-y-2 text-blue-700">
-          <li>Manténgase alejado de las zonas costeras</li>
-          <li>Siga las instrucciones de las autoridades locales</li>
-          <li>Esté atento a las alertas y actualizaciones oficiales</li>
-          <li>Tenga preparado un plan de evacuación</li>
-        </ul>
-      </div>
     </div>
   );
 };
-
-export default TsunamiResults;

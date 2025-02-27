@@ -8,7 +8,17 @@ import {
   FormMessage,
 } from '@/app/_components/ui/templates/form';
 import { Input } from '@/app/_components/ui/templates/input';
-import { FormInputProps } from '@/lib/types/form';
+
+type FormInputProps<T extends FieldValues> = {
+  control: any;
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  description?: string;
+  step?: string;
+  transform?: (value: string) => any;
+};
 
 export const FormInput = <T extends FieldValues>({
   control,

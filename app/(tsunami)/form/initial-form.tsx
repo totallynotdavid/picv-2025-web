@@ -1,13 +1,14 @@
+// FILE: app/(tsunami)/components/initial-form.tsx
 import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/app/_components/ui/templates/form';
 import { GenerateFormType } from '@/lib/schemas';
-import { FormInput } from '@/app/(tsunami)/form/form-input';
+import { FormInput } from './form-input';
 
 interface StepOneFormProps {
   form: UseFormReturn<GenerateFormType>;
 }
 
-const StepOneForm = ({ form }: StepOneFormProps) => (
+export const InitialForm = ({ form }: StepOneFormProps) => (
   <div className="space-y-6">
     <div className="bg-blue-50 p-4 rounded-lg">
       <h2 className="text-xl font-semibold text-blue-800 mb-2">
@@ -29,7 +30,6 @@ const StepOneForm = ({ form }: StepOneFormProps) => (
           step="0.1"
           placeholder="Mínimo 6.5 Mw"
           transform={parseFloat}
-          description="Ingrese la magnitud del sismo en escala de momento (Mw)"
         />
 
         <FormInput
@@ -40,7 +40,6 @@ const StepOneForm = ({ form }: StepOneFormProps) => (
           step="0.1"
           placeholder="Profundidad en kilómetros"
           transform={parseFloat}
-          description="Profundidad del epicentro en kilómetros"
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -70,11 +69,8 @@ const StepOneForm = ({ form }: StepOneFormProps) => (
           label="Fecha y hora del evento"
           type="datetime-local"
           transform={(v) => new Date(v)}
-          description="Seleccione la fecha y hora del evento sísmico"
         />
       </form>
     </Form>
   </div>
 );
-
-export default StepOneForm;
