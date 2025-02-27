@@ -1,11 +1,10 @@
 import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/app/_components/ui/templates/form';
-import { GenerateFormType } from '@/lib/schemas';
-import { FormInput } from './form-input';
-import { FormInputProps } from '@/lib/types/form';
+import { GenerateFormData } from '../types';
+import { FormInput } from '@/app/(tsunami)/form/form-input';
 
 interface InitialFormProps {
-  form: UseFormReturn<GenerateFormType>;
+  form: UseFormReturn<GenerateFormData>;
 }
 
 export const InitialForm = ({ form }: InitialFormProps) => (

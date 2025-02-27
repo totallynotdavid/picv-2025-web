@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,16 +8,26 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/app/_components/ui/templates/alert';
-import { GenerateFormType, generateFormSchema } from '@/lib/schemas';
+import { z } from 'zod';
 import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
 import { InitialForm } from './initial-form';
 import { SourceParameters } from './source-parameters';
 import { TsunamiResults } from './tsunami-results';
 import { ProgressIndicator } from '@/app/_components/ui/progress-indicator';
+import { Location, GenerateFormData } from '../types';
+
+// Form validation schema
+const generateFormSchema = z.object({
+  magnitude: z.number().min(6.5, { message: 'La magnitud mínima es 6.5 Mw' }),
+  depth: z.number().min(0, { message: 'La profundidad no puede ser negativa' }),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  datetime: z.date(),
+});
 
 interface TsunamiFormProps {
-  selectedLocation: { lat: number; lng: number } | null;
-  onLocationUpdate: (location: { lat: number; lng: number }) => void;
+  selectedLocation: Location | null;
+  onLocationUpdate: (location: Location) => void;
 }
 
 export const TsunamiForm = ({
@@ -36,17 +46,18 @@ export const TsunamiForm = ({
     reset,
   } = useTsunamiCalculator();
 
-  const form = useForm<GenerateFormType>({
+  const form = useForm<GenerateFormData>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
       magnitude: 7.5,
       depth: 10.0,
       latitude: -20.5,
       longitude: -70.5,
-      datetime: new Date().toISOString().slice(0, 16),
+      datetime: new Date(new Date().toISOString().slice(0, 16)),
     },
   });
 
+  // Update form when location is selected on the map
   useEffect(() => {
     if (selectedLocation) {
       form.setValue('latitude', selectedLocation.lat);
@@ -54,11 +65,12 @@ export const TsunamiForm = ({
     }
   }, [selectedLocation, form]);
 
+  // Move to results step when calculation is complete
   useEffect(() => {
     if (currentStage === 'complete') setCurrentStep(2);
   }, [currentStage]);
 
-  const handleSubmit = async (values: GenerateFormType) => {
+  const handleSubmit = async (values: GenerateFormData) => {
     await calculateTsunami(values);
     setCurrentStep(1);
   };

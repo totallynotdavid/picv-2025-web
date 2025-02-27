@@ -1,12 +1,7 @@
+import { SourceParameters as SourceParamsType } from '../types';
+
 interface SourceParametersProps {
-  parameters: {
-    length: number;
-    width: number;
-    dislocation: number;
-    seismic_moment: number;
-    lat0: number;
-    lon0: number;
-  } | null;
+  parameters: SourceParamsType | null;
 }
 
 export const SourceParameters = ({ parameters }: SourceParametersProps) => {

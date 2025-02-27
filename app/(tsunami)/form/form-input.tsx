@@ -1,4 +1,3 @@
-import { FieldValues } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -8,10 +7,12 @@ import {
   FormMessage,
 } from '@/app/_components/ui/templates/form';
 import { Input } from '@/app/_components/ui/templates/input';
+import { Control } from 'react-hook-form';
+import { GenerateFormData } from '../types';
 
-type FormInputProps<T extends FieldValues> = {
-  control: any;
-  name: string;
+type FormInputProps = {
+  control: Control<GenerateFormData>;
+  name: keyof GenerateFormData;
   label: string;
   type?: string;
   placeholder?: string;
@@ -20,7 +21,7 @@ type FormInputProps<T extends FieldValues> = {
   transform?: (value: string) => any;
 };
 
-export const FormInput = <T extends FieldValues>({
+export const FormInput = ({
   control,
   name,
   label,
@@ -29,7 +30,7 @@ export const FormInput = <T extends FieldValues>({
   description,
   step,
   transform = (v) => v,
-}: FormInputProps<T>) => (
+}: FormInputProps) => (
   <FormField
     control={control}
     name={name}
@@ -42,6 +43,11 @@ export const FormInput = <T extends FieldValues>({
             step={step}
             placeholder={placeholder}
             {...field}
+            value={
+              field.value instanceof Date
+                ? field.value.toISOString()
+                : field.value || ''
+            }
             onChange={(e) => field.onChange(transform(e.target.value))}
           />
         </FormControl>

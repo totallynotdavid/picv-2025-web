@@ -3,7 +3,11 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/app/_components/ui/templates/alert';
-import { TsunamiResultsProps } from '@/lib/types/tsunami';
+import { JobStatus } from '../types';
+
+interface TsunamiResultsProps {
+  jobStatus: JobStatus | null;
+}
 
 export const TsunamiResults = ({ jobStatus }: TsunamiResultsProps) => {
   if (!jobStatus) return null;

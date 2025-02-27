@@ -91,6 +91,11 @@ export declare namespace Tsunami {
   }
 }
 
+export interface Location {
+  lat: number;
+  lng: number;
+}
+
 export interface TsunamiResultsProps {
   jobStatus: JobStatus | null;
 }

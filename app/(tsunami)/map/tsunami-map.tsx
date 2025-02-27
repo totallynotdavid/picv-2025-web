@@ -1,18 +1,24 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import type { Map as LeafletMap, Layer, LatLngBounds } from 'leaflet';
-import LeafletCSS from '@/app/_components/ui/leaflet-css';
+import { Location } from '../types';
+
+// Component for loading Leaflet CSS
+const LeafletCSS = () => {
+  return (
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossOrigin=""
+    />
+  );
+};
 
 interface MapContentProps {
-  onLocationSelect?: (lat: number, lng: number) => void;
-  selectedLocation?: { lat: number; lng: number } | null;
-}
-
-interface LeafletElements {
-  marker: Layer | null;
-  rectangle: Layer | null;
+  onLocationSelect: (lat: number, lng: number) => void;
+  selectedLocation: Location | null;
 }
 
 const MapContent = ({
@@ -20,139 +26,126 @@ const MapContent = ({
   selectedLocation,
 }: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<LeafletMap | null>(null);
-  const leafletElements = useRef<LeafletElements>({
+  const [leaflet, setLeaflet] = useState<any>(null);
+  const mapInstance = useRef<any>(null);
+  const markers = useRef<{
+    marker: any | null;
+    rectangle: any | null;
+  }>({
     marker: null,
     rectangle: null,
   });
 
-  const clearMapElements = () => {
-    if (leafletElements.current.marker) {
-      leafletElements.current.marker.remove();
-      leafletElements.current.marker = null;
-    }
-    if (leafletElements.current.rectangle) {
-      leafletElements.current.rectangle.remove();
-      leafletElements.current.rectangle = null;
-    }
-  };
+  // Initialize Leaflet
+  useEffect(() => {
+    import('leaflet').then((L) => {
+      setLeaflet(L.default);
+    });
+  }, []);
 
-  const updateMapMarkers = async (lat: number, lng: number) => {
-    if (!mapInstance.current) return;
+  // Clear map elements
+  const clearMapElements = useCallback(() => {
+    if (markers.current.marker) {
+      markers.current.marker.remove();
+      markers.current.marker = null;
+    }
+    if (markers.current.rectangle) {
+      markers.current.rectangle.remove();
+      markers.current.rectangle = null;
+    }
+  }, []);
 
-    try {
-      const L = (await import('leaflet')).default;
+  // Update map markers
+  const updateMapMarkers = useCallback(
+    (lat: number, lng: number) => {
+      if (!mapInstance.current || !leaflet) return;
 
       // Clear existing markers
       clearMapElements();
 
       // Add new marker
-      leafletElements.current.marker = L.marker([lat, lng]).addTo(
-        mapInstance.current,
-      );
+      markers.current.marker = leaflet
+        .marker([lat, lng])
+        .addTo(mapInstance.current);
 
       // Add new rectangle
-      const bounds: LatLngBounds = L.latLngBounds(
+      const bounds = leaflet.latLngBounds(
         [lat - 0.5, lng - 0.5],
         [lat + 0.5, lng + 0.5],
       );
 
-      leafletElements.current.rectangle = L.rectangle(bounds, {
-        color: '#2563eb',
-        weight: 2,
-        fillOpacity: 0.1,
-        opacity: 0.8,
-      }).addTo(mapInstance.current);
+      markers.current.rectangle = leaflet
+        .rectangle(bounds, {
+          color: '#2563eb',
+          weight: 2,
+          fillOpacity: 0.1,
+          opacity: 0.8,
+        })
+        .addTo(mapInstance.current);
 
+      // Fly to the location
       mapInstance.current.flyTo([lat, lng], 8, {
         duration: 1.5,
         easeLinearity: 0.25,
       });
-    } catch (error) {
-      console.error('Error updating map markers:', error);
-    }
-  };
+    },
+    [leaflet, clearMapElements],
+  );
 
+  // Initialize map
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !leaflet) return;
 
     if (mapInstance.current) {
       mapInstance.current.remove();
-      mapInstance.current = null;
     }
 
-    let isMapValid = true;
+    // Initialize map
+    mapInstance.current = leaflet.map(mapRef.current, {
+      center: [20, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 18,
+      zoomControl: false,
+    });
 
-    const initMap = async () => {
-      try {
-        const L = (await import('leaflet')).default;
-        const markerIcon = (await import('leaflet/dist/images/marker-icon.png'))
-          .default;
-        const markerIcon2x = (
-          await import('leaflet/dist/images/marker-icon-2x.png')
-        ).default;
-        const markerShadow = (
-          await import('leaflet/dist/images/marker-shadow.png')
-        ).default;
+    // Add tile layer
+    leaflet
+      .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors',
+      })
+      .addTo(mapInstance.current);
 
-        if (!isMapValid || !mapRef.current) return;
+    // Add zoom control
+    leaflet.control.zoom({ position: 'topright' }).addTo(mapInstance.current);
 
-        L.Icon.Default.mergeOptions({
-          iconUrl: markerIcon.src,
-          iconRetinaUrl: markerIcon2x.src,
-          shadowUrl: markerShadow.src,
-        });
+    // Set up click handler
+    mapInstance.current.on('click', (e: any) => {
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
+    });
 
-        mapInstance.current = L.map(mapRef.current, {
-          center: [20, 0],
-          zoom: 2,
-          minZoom: 2,
-          maxZoom: 18,
-          zoomControl: true,
-          scrollWheelZoom: true,
-        });
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-        }).addTo(mapInstance.current);
-
-        mapInstance.current.on('click', (e) => {
-          const { lat, lng } = e.latlng;
-          onLocationSelect?.(lat, lng);
-        });
-
-        if (
-          selectedLocation &&
-          (selectedLocation.lat !== 0 || selectedLocation.lng !== 0)
-        ) {
-          updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
-        }
-      } catch (error) {
-        console.error('Error initializing map:', error);
-      }
-    };
-
-    initMap();
-
+    // Clean up on unmount
     return () => {
-      isMapValid = false;
       clearMapElements();
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
       }
     };
-  }, []);
+  }, [leaflet, onLocationSelect, clearMapElements]);
 
   // Update markers when selected location changes
   useEffect(() => {
     if (
       selectedLocation &&
+      leaflet &&
+      mapInstance.current &&
       (selectedLocation.lat !== 0 || selectedLocation.lng !== 0)
     ) {
       updateMapMarkers(selectedLocation.lat, selectedLocation.lng);
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, updateMapMarkers, leaflet]);
 
   return (
     <>
@@ -165,6 +158,7 @@ const MapContent = ({
   );
 };
 
+// Use dynamic import to load the map on the client side
 const TsunamiMap = dynamic(() => Promise.resolve(MapContent), {
   ssr: false,
   loading: () => (
