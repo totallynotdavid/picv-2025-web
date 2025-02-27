@@ -9,7 +9,7 @@ import {
   AlertDescription,
 } from '@/app/_components/ui/templates/alert';
 import { GenerateFormType, generateFormSchema } from '@/lib/schemas';
-import { useTsunamiCalculator } from '../hooks/use-tsunami-calculator';
+import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
 import { InitialForm } from './initial-form';
 import { SourceParameters } from './source-parameters';
 import { TsunamiResults } from './tsunami-results';
@@ -43,7 +43,7 @@ export const TsunamiForm = ({
       depth: 10.0,
       latitude: -20.5,
       longitude: -70.5,
-      datetime: new Date(),
+      datetime: new Date().toISOString().slice(0, 16),
     },
   });
 

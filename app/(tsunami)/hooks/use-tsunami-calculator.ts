@@ -21,6 +21,8 @@ export const useTsunamiCalculator = () => {
   const pollJobStatus = useCallback(async (jobId: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/job-status/${jobId}`);
+      if (!response.ok)
+        throw new Error('Error al obtener el estado del trabajo');
       const data = await response.json();
 
       setState((prev) => ({
@@ -28,23 +30,31 @@ export const useTsunamiCalculator = () => {
         jobStatus: data,
         progress: data.status === 'completed' ? 100 : prev.progress + 20,
         currentStage: data.status === 'completed' ? 'complete' : 'processing',
+        isLoading: data.status === 'completed' ? false : prev.isLoading,
       }));
 
       if (data.status !== 'completed') {
         setTimeout(() => pollJobStatus(jobId), 5000);
       }
-    } catch (error) {
+    } catch (error: any) {
       setState((prev) => ({
         ...prev,
         error: 'Error al verificar el estado del trabajo',
         currentStage: 'error',
+        isLoading: false,
       }));
     }
   }, []);
 
   const calculateTsunami = useCallback(
     async (values: GenerateFormType) => {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      setState((prev) => ({
+        ...prev,
+        isLoading: true,
+        error: null,
+        currentStage: 'calculating',
+        progress: 0,
+      }));
 
       try {
         // Step 1: /calculate
@@ -61,6 +71,7 @@ export const useTsunamiCalculator = () => {
         // Step 2: /tsunami-travel-times
         const travelRes = await fetch(`${API_BASE_URL}/tsunami-travel-times`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
         if (!travelRes.ok) throw new Error('Error en tiempos de viaje');
@@ -68,8 +79,10 @@ export const useTsunamiCalculator = () => {
         // Step 3: /run-tsdhn
         const jobRes = await fetch(`${API_BASE_URL}/run-tsdhn`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
+        if (!jobRes.ok) throw new Error('Error al iniciar TSDHN');
         const jobData = await jobRes.json();
         pollJobStatus(jobData.job_id);
       } catch (error: any) {

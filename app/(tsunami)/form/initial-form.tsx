@@ -1,14 +1,14 @@
-// FILE: app/(tsunami)/components/initial-form.tsx
 import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/app/_components/ui/templates/form';
 import { GenerateFormType } from '@/lib/schemas';
 import { FormInput } from './form-input';
+import { FormInputProps } from '@/lib/types/form';
 
-interface StepOneFormProps {
+interface InitialFormProps {
   form: UseFormReturn<GenerateFormType>;
 }
 
-export const InitialForm = ({ form }: StepOneFormProps) => (
+export const InitialForm = ({ form }: InitialFormProps) => (
   <div className="space-y-6">
     <div className="bg-blue-50 p-4 rounded-lg">
       <h2 className="text-xl font-semibold text-blue-800 mb-2">
