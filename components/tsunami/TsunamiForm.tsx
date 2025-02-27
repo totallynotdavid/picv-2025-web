@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import useMeasure from 'react-use-measure';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import { generateFormSchema, GenerateFormType } from '@/utils/schema';
 import { useTsunamiCalculator } from '@/components/useTsunamiCalculator';
@@ -12,6 +13,7 @@ import { formatCoordinate } from '@/utils/utils';
 import StepOneForm from '@/components/tsunami/StepOneForm';
 import SourceParameters from '@/components/tsunami/SourceParameters';
 import TsunamiResults from '@/components/tsunami/TsunamiResults';
+import ProgressIndicator from '@/components/tsunami/ProgressIndicator';
 
 interface TsunamiFormProps {
   selectedLocation: Location | null;
@@ -25,16 +27,25 @@ const TsunamiForm = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [ref, bounds] = useMeasure();
 
-  const { isLoading, calculationResult, sourceParams, calculateTsunami } =
-    useTsunamiCalculator();
+  const {
+    isLoading,
+    error,
+    currentStage,
+    progress,
+    sourceParams,
+    calculationResult,
+    estimatedTimeRemaining,
+    calculateTsunami,
+    reset
+  } = useTsunamiCalculator();
 
   const form = useForm<GenerateFormType>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
-      magnitude: 6.5,
-      depth: 0,
-      latitude: 0,
-      longitude: 0,
+      magnitude: 9.0,
+      depth: 12.0,
+      latitude: 56,
+      longitude: -156,
       datetime: new Date(),
     },
   });
@@ -63,12 +74,26 @@ const TsunamiForm = ({
         lng: formatCoordinate(longitude),
       });
     }
-  }, [latitude, longitude, onLocationUpdate]);
+  }, [latitude, longitude, onLocationUpdate, selectedLocation]);
+
+  // Reset the form when the component unmounts
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, [reset]);
+
+  // Move to results when calculation is complete
+  useEffect(() => {
+    if (currentStage === 'complete' && calculationResult) {
+      setCurrentStep(2);
+    }
+  }, [currentStage, calculationResult]);
 
   const handleSubmit = async (values: GenerateFormType) => {
     try {
       await calculateTsunami(values);
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(1); // Move to parameters view
     } catch (error) {
       // Error handling is done in the hook
     }
@@ -79,7 +104,16 @@ const TsunamiForm = ({
       case 0:
         return <StepOneForm form={form} />;
       case 1:
-        return <SourceParameters parameters={sourceParams} />;
+        return (
+          <>
+            <SourceParameters parameters={sourceParams} />
+            <ProgressIndicator 
+              stage={currentStage} 
+              progress={progress} 
+              estimatedTimeRemaining={estimatedTimeRemaining} 
+            />
+          </>
+        );
       case 2:
         return <TsunamiResults result={calculationResult} />;
       default:
@@ -89,6 +123,13 @@ const TsunamiForm = ({
 
   return (
     <>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <MotionConfig transition={{ duration: 0.5, type: 'spring', bounce: 0 }}>
         <motion.div
           animate={{ height: bounds.height }}
@@ -113,22 +154,40 @@ const TsunamiForm = ({
         <Button
           type="button"
           variant="outline"
-          disabled={currentStep === 0}
-          onClick={() => setCurrentStep((prev) => prev - 1)}
-        >
-          Anterior
-        </Button>
-        <Button
-          type="button"
-          disabled={currentStep === 2 || isLoading}
+          disabled={currentStep === 0 || isLoading}
           onClick={() => {
-            if (currentStep < 2) {
-              form.handleSubmit(handleSubmit)();
+            if (currentStep > 0) {
+              setCurrentStep((prev) => prev - 1);
             }
           }}
         >
-          {isLoading ? <LoadingDots color="white" /> : 'Continuar'}
+          Anterior
         </Button>
+        
+        {currentStep === 2 ? (
+          <Button
+            type="button"
+            onClick={() => {
+              reset();
+              setCurrentStep(0);
+              form.reset();
+            }}
+          >
+            Nueva Simulación
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            disabled={currentStep === 1 && isLoading}
+            onClick={() => {
+              if (currentStep < 2) {
+                form.handleSubmit(handleSubmit)();
+              }
+            }}
+          >
+            {isLoading ? <LoadingDots color="white" /> : 'Continuar'}
+          </Button>
+        )}
       </motion.div>
     </>
   );

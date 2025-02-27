@@ -1,22 +1,22 @@
-import * as z from 'zod';
+import { z } from 'zod';
 
 export const generateFormSchema = z.object({
   magnitude: z
     .number()
-    .min(6.5, 'La magnitud debe ser al menos 6.5 Mw')
-    .max(10, 'La magnitud no puede exceder 10 Mw'),
+    .min(6.5, { message: 'La magnitud mínima es 6.5' })
+    .max(9.5, { message: 'La magnitud máxima es 9.5' }),
   depth: z
     .number()
-    .min(0, 'La profundidad no puede ser negativa')
-    .max(1000, 'La profundidad no puede exceder 1000 km'),
+    .min(0, { message: 'La profundidad mínima es 0 km' })
+    .max(100, { message: 'La profundidad máxima es 100 km' }),
   latitude: z
     .number()
-    .min(-90, 'La latitud debe estar entre -90 y 90')
-    .max(90, 'La latitud debe estar entre -90 y 90'),
+    .min(-90, { message: 'La latitud mínima es -90' })
+    .max(90, { message: 'La latitud máxima es 90' }),
   longitude: z
     .number()
-    .min(-180, 'La longitud debe estar entre -180 y 180')
-    .max(180, 'La longitud debe estar entre -180 y 180'),
+    .min(-180, { message: 'La longitud mínima es -180' })
+    .max(180, { message: 'La longitud máxima es 180' }),
   datetime: z.date(),
 });
 
