@@ -37,7 +37,7 @@ export const FormInput = ({
               value={
                 field.value instanceof Date
                   ? field.value.toISOString().slice(0, 16)
-                  : field.value ?? ''
+                  : (field.value ?? '')
               }
               onChange={(e) => field.onChange(transform(e.target.value))}
             />

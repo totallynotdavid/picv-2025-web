@@ -17,7 +17,6 @@ export const InitialForm = ({ form }: InitialFormProps) => (
     <Form {...form}>
       <form className="space-y-6">
         <FormInput
-          control={form.control}
           name="magnitude"
           label="Magnitud (Mw)"
           type="number"
@@ -27,7 +26,6 @@ export const InitialForm = ({ form }: InitialFormProps) => (
         />
 
         <FormInput
-          control={form.control}
           name="depth"
           label="Profundidad (km)"
           type="number"
@@ -38,7 +36,6 @@ export const InitialForm = ({ form }: InitialFormProps) => (
 
         <div className="grid grid-cols-2 gap-4">
           <FormInput
-            control={form.control}
             name="latitude"
             label="Latitud"
             type="number"
@@ -47,7 +44,6 @@ export const InitialForm = ({ form }: InitialFormProps) => (
             transform={parseFloat}
           />
           <FormInput
-            control={form.control}
             name="longitude"
             label="Longitud"
             type="number"
@@ -58,7 +54,6 @@ export const InitialForm = ({ form }: InitialFormProps) => (
         </div>
 
         <FormInput
-          control={form.control}
           name="datetime"
           label="Fecha y hora del evento"
           type="datetime-local"

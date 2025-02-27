@@ -19,7 +19,10 @@ interface MapContentProps {
   selectedLocation: { lat: number; lng: number } | null;
 }
 
-const MapContent = ({ onLocationSelect, selectedLocation }: MapContentProps) => {
+const MapContent = ({
+  onLocationSelect,
+  selectedLocation,
+}: MapContentProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const markers = useRef<MapMarkers | null>(null);
 
@@ -29,7 +32,7 @@ const MapContent = ({ onLocationSelect, selectedLocation }: MapContentProps) => 
     const initializeMap = () => {
       const container = document.createElement('div');
       container.className = 'h-[600px] w-full rounded-lg';
-      
+
       const map = L.map(container, {
         center: [20, 0],
         zoom: 2,
@@ -63,7 +66,10 @@ const MapContent = ({ onLocationSelect, selectedLocation }: MapContentProps) => 
 
   useEffect(() => {
     if (selectedLocation && mapRef.current) {
-      markers.current?.updateMarkers(selectedLocation.lat, selectedLocation.lng);
+      markers.current?.updateMarkers(
+        selectedLocation.lat,
+        selectedLocation.lng,
+      );
       mapRef.current.flyTo([selectedLocation.lat, selectedLocation.lng], 8, {
         duration: 1.5,
       });
@@ -73,7 +79,10 @@ const MapContent = ({ onLocationSelect, selectedLocation }: MapContentProps) => 
   return (
     <>
       <LeafletCSS />
-      <div id="map-container" className="w-full h-[600px] rounded-lg overflow-hidden" />
+      <div
+        id="map-container"
+        className="w-full h-[600px] rounded-lg overflow-hidden"
+      />
     </>
   );
 };

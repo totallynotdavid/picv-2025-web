@@ -7,10 +7,6 @@ export class MapMarkers {
 
   constructor(map: L.Map) {
     this.map = map;
-    this.initializeIcons();
-  }
-
-  private initializeIcons() {
     L.Icon.Default.mergeOptions({
       iconUrl: '/markers/marker-icon.png',
       iconRetinaUrl: '/markers/marker-icon-2x.png',
@@ -22,7 +18,6 @@ export class MapMarkers {
     this.clearMarkers();
 
     this.marker = L.marker([lat, lng]).addTo(this.map);
-
     const bounds = L.latLngBounds(
       [lat - 0.5, lng - 0.5],
       [lat + 0.5, lng + 0.5],

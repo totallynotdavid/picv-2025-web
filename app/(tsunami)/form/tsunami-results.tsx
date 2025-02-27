@@ -30,6 +30,8 @@ export const TsunamiResults = ({ jobStatus }: TsunamiResultsProps) => {
             <a
               href={jobStatus.download_url}
               className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               Descargar reporte
             </a>

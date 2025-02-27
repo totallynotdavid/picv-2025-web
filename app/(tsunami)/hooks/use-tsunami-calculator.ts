@@ -21,39 +21,49 @@ export const useTsunamiCalculator = () => {
     jobStatus: null as JobStatus | null,
   });
 
-  const pollJobStatus = useCallback(async (jobId: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/job-status/${jobId}`);
-      if (!response.ok) {
-        throw new Error('Error al obtener el estado del trabajo');
+  const pollJobStatus = useCallback(
+    async (jobId: string, signal?: AbortSignal) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/job-status/${jobId}`, {
+          signal,
+        });
+        if (!response.ok)
+          throw new Error('Error al obtener el estado del trabajo');
+
+        const data = await response.json();
+
+        setState((prev) => ({
+          ...prev,
+          jobStatus: data,
+          progress:
+            data.status === 'completed'
+              ? 100
+              : Math.min(prev.progress + 10, 90),
+          currentStage: data.status === 'completed' ? 'complete' : 'processing',
+          isLoading: data.status !== 'completed',
+        }));
+
+        if (data.status !== 'completed') {
+          setTimeout(() => pollJobStatus(jobId, signal), 5000);
+        }
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          setState((prev) => ({
+            ...prev,
+            error: 'Error al verificar el estado del trabajo',
+            currentStage: 'error',
+            isLoading: false,
+          }));
+        }
       }
-
-      const data = await response.json();
-
-      setState((prev) => ({
-        ...prev,
-        jobStatus: data,
-        progress:
-          data.status === 'completed' ? 100 : Math.min(prev.progress + 10, 90),
-        currentStage: data.status === 'completed' ? 'complete' : 'processing',
-        isLoading: data.status === 'completed' ? false : prev.isLoading,
-      }));
-
-      if (data.status !== 'completed') {
-        setTimeout(() => pollJobStatus(jobId), 5000);
-      }
-    } catch (error: any) {
-      setState((prev) => ({
-        ...prev,
-        error: 'Error al verificar el estado del trabajo',
-        currentStage: 'error',
-        isLoading: false,
-      }));
-    }
-  }, []);
+    },
+    [],
+  );
 
   const calculateTsunami = useCallback(
     async (values: GenerateFormData) => {
+      const controller = new AbortController();
+
       setState((prev) => ({
         ...prev,
         isLoading: true,
@@ -67,48 +77,48 @@ export const useTsunamiCalculator = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
+          signal: controller.signal,
         });
 
-        if (!calculateRes.ok) {
-          throw new Error('Error en cálculo inicial');
-        }
-
+        if (!calculateRes.ok) throw new Error('Error en cálculo inicial');
         const sourceParams = await calculateRes.json();
+
         setState((prev) => ({ ...prev, sourceParams, progress: 30 }));
 
         const travelRes = await fetch(`${API_BASE_URL}/tsunami-travel-times`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
+          signal: controller.signal,
         });
 
-        if (!travelRes.ok) {
-          throw new Error('Error en tiempos de viaje');
-        }
-
+        if (!travelRes.ok) throw new Error('Error en tiempos de viaje');
         setState((prev) => ({ ...prev, progress: 50 }));
 
         const jobRes = await fetch(`${API_BASE_URL}/run-tsdhn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
+          signal: controller.signal,
         });
 
-        if (!jobRes.ok) {
-          throw new Error('Error al iniciar TSDHN');
-        }
-
+        if (!jobRes.ok) throw new Error('Error al iniciar TSDHN');
         const jobData = await jobRes.json();
+
         setState((prev) => ({ ...prev, progress: 70 }));
-        pollJobStatus(jobData.job_id);
+        pollJobStatus(jobData.job_id, controller.signal);
       } catch (error: any) {
-        setState((prev) => ({
-          ...prev,
-          error: error.message,
-          currentStage: 'error',
-          isLoading: false,
-        }));
+        if (error.name !== 'AbortError') {
+          setState((prev) => ({
+            ...prev,
+            error: error.message,
+            currentStage: 'error',
+            isLoading: false,
+          }));
+        }
       }
+
+      return () => controller.abort();
     },
     [pollJobStatus],
   );

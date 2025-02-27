@@ -1,4 +1,4 @@
-import { Control, UseFormReturn } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 import { Location } from './tsunami';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -15,7 +15,6 @@ export interface GenerateFormData {
 }
 
 export type FormInputProps = {
-  control: Control<GenerateFormData>;
   name: keyof GenerateFormData;
   label: string;
   type?: string;

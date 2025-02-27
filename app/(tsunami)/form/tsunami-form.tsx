@@ -3,7 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/app/_components/ui/templates/button';
-import { Alert, AlertTitle, AlertDescription } from '@/app/_components/ui/templates/alert';
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/app/_components/ui/templates/alert';
 import { Form } from '@/app/_components/ui/templates/form';
 import { z } from 'zod';
 import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
@@ -21,9 +25,21 @@ const generateFormSchema = z.object({
   datetime: z.date(),
 });
 
-export const TsunamiForm = ({ selectedLocation }: TsunamiFormProps) => {
+export const TsunamiForm = ({
+  selectedLocation,
+  onLocationUpdate,
+}: TsunamiFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const { isLoading, error, currentStage, progress, sourceParams, jobStatus, calculateTsunami, reset } = useTsunamiCalculator();
+  const {
+    isLoading,
+    error,
+    currentStage,
+    progress,
+    sourceParams,
+    jobStatus,
+    calculateTsunami,
+    reset,
+  } = useTsunamiCalculator();
   const form = useForm<GenerateFormData>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
@@ -41,6 +57,18 @@ export const TsunamiForm = ({ selectedLocation }: TsunamiFormProps) => {
       form.setValue('longitude', selectedLocation.lng);
     }
   }, [selectedLocation, form]);
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      if (values.latitude && values.longitude) {
+        onLocationUpdate({
+          lat: Number(values.latitude),
+          lng: Number(values.longitude),
+        });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onLocationUpdate]);
 
   useEffect(() => {
     if (currentStage === 'complete') setCurrentStep(2);
@@ -91,7 +119,12 @@ export const TsunamiForm = ({ selectedLocation }: TsunamiFormProps) => {
             </Button>
 
             {currentStep === 2 ? (
-              <Button onClick={() => { reset(); setCurrentStep(0); }}>
+              <Button
+                onClick={() => {
+                  reset();
+                  setCurrentStep(0);
+                }}
+              >
                 Nueva simulación
               </Button>
             ) : (
