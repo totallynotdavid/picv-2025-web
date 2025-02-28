@@ -9,7 +9,7 @@ type CalculationStage =
   | 'idle'
   | 'processing';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'localhost:8000';
 
 export const useTsunamiCalculator = () => {
   const [isLoading, setIsLoading] = useState(false);
