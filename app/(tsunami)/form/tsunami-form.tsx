@@ -10,8 +10,7 @@ import {
 } from '@/app/_components/ui/templates/alert';
 import { Button } from '@/app/_components/ui/templates/button';
 import { Form } from '@/app/_components/ui/templates/form';
-import { TsunamiFormData } from '@/lib/types';
-import { TsunamiFormProps } from '@/lib/types/form';
+import { TsunamiFormData, TsunamiFormProps } from '@/lib/types/tsunami';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';

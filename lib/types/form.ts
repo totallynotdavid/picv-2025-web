@@ -1,5 +1,3 @@
-import { Location } from '@/lib/types/tsunami';
-
 export type FormInputProps = {
   description?: string;
   label: string;
@@ -17,10 +15,4 @@ export interface GenerateFormData {
   latitude: number;
   longitude: number;
   magnitude: number;
-}
-
-export interface TsunamiFormProps {
-  // eslint-disable-next-line no-unused-vars
-  onLocationUpdate: (location: Location) => void;
-  selectedLocation: Location | null;
 }

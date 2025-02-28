@@ -1,5 +1,5 @@
 import { JobStatus } from '@/lib/types';
-import { SourceParams, TsunamiFormData } from '@/lib/types/tsunami';
+import { SourceParameters, TsunamiFormData } from '@/lib/types/tsunami';
 import { useCallback, useRef, useState } from 'react';
 
 type CalculationStage =
@@ -16,7 +16,9 @@ export const useTsunamiCalculator = () => {
   const [error, setError] = useState<null | string>(null);
   const [currentStage, setCurrentStage] = useState<CalculationStage>('idle');
   const [progress, setProgress] = useState(0);
-  const [sourceParams, setSourceParams] = useState<null | SourceParams>(null);
+  const [sourceParams, setSourceParams] = useState<null | SourceParameters>(
+    null,
+  );
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
