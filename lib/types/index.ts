@@ -14,15 +14,3 @@ export interface ProgressIndicatorProps {
     | 'processing'
     | 'travelTimes';
 }
-
-export interface TsunamiFormData {
-  datetime: Date;
-  depth: number;
-  latitude: number;
-  longitude: number;
-  magnitude: number;
-}
-
-export interface TsunamiResultsProps {
-  jobStatus: JobStatus | null;
-}

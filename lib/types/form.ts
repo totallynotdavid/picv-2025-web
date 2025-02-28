@@ -1,5 +1,4 @@
 import { Location } from '@/lib/types/tsunami';
-import { UseFormReturn } from 'react-hook-form';
 
 export type FormInputProps = {
   description?: string;
@@ -18,10 +17,6 @@ export interface GenerateFormData {
   latitude: number;
   longitude: number;
   magnitude: number;
-}
-
-export interface InitialFormProps {
-  form: UseFormReturn<GenerateFormData>;
 }
 
 export interface TsunamiFormProps {

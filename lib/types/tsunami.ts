@@ -1,3 +1,5 @@
+import { JobStatus } from './index';
+
 export interface CalculateResponse {
   azimuth: number;
   dip: number;
@@ -38,16 +40,6 @@ export interface JobResponse {
   job_id: string;
   message: string;
   status: string;
-}
-
-export interface JobStatus {
-  created_at: string;
-  details: string;
-  download_url: string | undefined;
-  ended_at: null | string;
-  error: string | undefined;
-  started_at: string;
-  status: 'completed' | 'failed' | 'queued' | 'running';
 }
 
 export interface Location {
@@ -102,6 +94,14 @@ export interface SourceParams {
   lon0: number;
   seismic_moment: number;
   width: number;
+}
+
+export interface TsunamiFormData {
+  datetime: Date;
+  depth: number;
+  latitude: number;
+  longitude: number;
+  magnitude: number;
 }
 
 export interface TsunamiResultsProps {

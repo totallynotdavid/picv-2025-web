@@ -1,5 +1,5 @@
-import { JobStatus, TsunamiFormData } from '@/lib/types';
-import { SourceParams } from '@/lib/types/tsunami';
+import { JobStatus } from '@/lib/types';
+import { SourceParams, TsunamiFormData } from '@/lib/types/tsunami';
 import { useCallback, useRef, useState } from 'react';
 
 type CalculationStage =
