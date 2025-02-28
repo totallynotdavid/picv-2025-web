@@ -52,6 +52,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
     "eslint": "8.49.0",
-    "eslint-config-next": "13.4.19"
+    "eslint-config-next": "13.4.19",
+    "eslint-plugin-perfectionist": "^4.9.0"
   }
 }

@@ -11,12 +11,12 @@ export const formatCoordinate = (value: number): number => {
 
 export const getRiskLevelClass = (riskLevel: string): string => {
   switch (riskLevel.toLowerCase()) {
+    case 'alto':
+      return 'bg-orange-50 text-orange-800 border-orange-300';
     case 'bajo':
       return 'bg-green-50 text-green-800 border-green-300';
     case 'moderado':
       return 'bg-yellow-50 text-yellow-800 border-yellow-300';
-    case 'alto':
-      return 'bg-orange-50 text-orange-800 border-orange-300';
     case 'severo':
       return 'bg-red-50 text-red-800 border-red-300';
     default:

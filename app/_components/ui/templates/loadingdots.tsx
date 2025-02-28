@@ -2,7 +2,7 @@ import styles from './loading-dots.module.css';
 
 interface LoadingDotsProps {
   color?: string;
-  style?: 'small' | 'large';
+  style?: 'large' | 'small';
 }
 
 const LoadingDots = ({ color = '#000', style = 'small' }: LoadingDotsProps) => {

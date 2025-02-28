@@ -1,8 +1,9 @@
-import { Navbar } from '@/app/_components/layout/navbar';
-import '@/app/globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+
+import '@/app/globals.css';
 import Footer from '@/app/_components/layout/footer';
+import { Navbar } from '@/app/_components/layout/navbar';
+import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,24 +13,24 @@ let url = 'https://tsdhn.vercel.app/';
 let sitename = 'TSDHN';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(url),
-  title,
   description,
   icons: {
     icon: '/favicon.ico',
   },
+  metadataBase: new URL(url),
   openGraph: {
-    title,
     description,
-    url: url,
-    siteName: sitename,
     locale: 'es_PE',
+    siteName: sitename,
+    title,
     type: 'website',
+    url: url,
   },
+  title,
   twitter: {
     card: 'summary_large_image',
-    title,
     description,
+    title,
   },
 };
 

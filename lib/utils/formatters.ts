@@ -1,5 +1,5 @@
-import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export const formatCoordinate = (coord: number) => Number(coord.toFixed(4));
 export const formatRiskLevel = (level: string) =>

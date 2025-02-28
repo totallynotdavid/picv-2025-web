@@ -1,54 +1,63 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/app/_components/ui/templates/button';
+import { InitialForm } from '@/app/(tsunami)/form/initial-form';
+import { SourceParameters } from '@/app/(tsunami)/form/source-parameters';
+import { TsunamiResults } from '@/app/(tsunami)/form/tsunami-results';
+import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
+import { ProgressIndicator } from '@/app/_components/ui/progress-indicator';
 import {
   Alert,
-  AlertTitle,
   AlertDescription,
+  AlertTitle,
 } from '@/app/_components/ui/templates/alert';
+import { Button } from '@/app/_components/ui/templates/button';
 import { Form } from '@/app/_components/ui/templates/form';
+import { TsunamiFormData } from '@/lib/types';
+import { TsunamiFormProps } from '@/lib/types/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useTsunamiCalculator } from '@/app/(tsunami)/hooks/use-tsunami-calculator';
-import { InitialForm } from './initial-form';
-import { SourceParameters } from './source-parameters';
-import { TsunamiResults } from './tsunami-results';
-import { ProgressIndicator } from '@/app/_components/ui/progress-indicator';
-import { GenerateFormData, TsunamiFormProps } from '@/lib/types/form';
 
-const generateFormSchema = z.object({
-  magnitude: z.number().min(6.5, { message: 'La magnitud mínima es 6.5 Mw' }),
-  depth: z.number().min(0, { message: 'La profundidad no puede ser negativa' }),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+const tsunamiFormSchema = z.object({
   datetime: z.date(),
+  depth: z.number().min(0, { message: 'La profundidad no puede ser negativa' }),
+  latitude: z
+    .number()
+    .min(-90)
+    .max(90, { message: 'Latitud debe estar entre -90 y 90' }),
+  longitude: z
+    .number()
+    .min(-180)
+    .max(180, { message: 'Longitud debe estar entre -180 y 180' }),
+  magnitude: z.number().min(6.5, { message: 'La magnitud mínima es 6.5 Mw' }),
 });
 
 export const TsunamiForm = ({
-  selectedLocation,
   onLocationUpdate,
+  selectedLocation,
 }: TsunamiFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+
   const {
-    isLoading,
-    error,
-    currentStage,
-    progress,
-    sourceParams,
-    jobStatus,
     calculateTsunami,
+    currentStage,
+    error,
+    isLoading,
+    jobStatus,
+    progress,
     reset,
+    sourceParams,
   } = useTsunamiCalculator();
-  const form = useForm<GenerateFormData>({
-    resolver: zodResolver(generateFormSchema),
+
+  const form = useForm<TsunamiFormData>({
     defaultValues: {
-      magnitude: 7.5,
+      datetime: new Date(),
       depth: 10.0,
       latitude: -20.5,
       longitude: -70.5,
-      datetime: new Date(),
+      magnitude: 7.5,
     },
+    resolver: zodResolver(tsunamiFormSchema),
   });
 
   useEffect(() => {
@@ -60,23 +69,38 @@ export const TsunamiForm = ({
 
   useEffect(() => {
     const subscription = form.watch((values) => {
-      if (values.latitude && values.longitude) {
-        onLocationUpdate({
-          lat: Number(values.latitude),
-          lng: Number(values.longitude),
-        });
+      const lat = values.latitude;
+      const lng = values.longitude;
+
+      if (
+        typeof lat === 'number' &&
+        typeof lng === 'number' &&
+        !isNaN(lat) &&
+        !isNaN(lng)
+      ) {
+        onLocationUpdate({ lat, lng });
       }
     });
+
     return () => subscription.unsubscribe();
   }, [form, onLocationUpdate]);
 
   useEffect(() => {
-    if (currentStage === 'complete') setCurrentStep(2);
+    if (currentStage === 'complete') {
+      setCurrentStep(2);
+    }
   }, [currentStage]);
 
-  const handleSubmit = async (values: GenerateFormData) => {
+  const handleSubmit = async (values: TsunamiFormData) => {
     await calculateTsunami(values);
     setCurrentStep(1);
+  };
+
+  const transitions = {
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: '-100%' },
+    initial: { opacity: 0, x: '100%' },
+    transition: { duration: 0.3 },
   };
 
   return (
@@ -89,20 +113,15 @@ export const TsunamiForm = ({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '-100%', opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {currentStep === 0 && <InitialForm form={form} />}
+            <motion.div key={currentStep} {...transitions}>
+              {currentStep === 0 && <InitialForm />}
+
               {currentStep === 1 && (
                 <>
                   <SourceParameters parameters={sourceParams} />
-                  <ProgressIndicator stage={currentStage} progress={progress} />
+                  <ProgressIndicator progress={progress} stage={currentStage} />
                 </>
               )}
               {currentStep === 2 && <TsunamiResults jobStatus={jobStatus} />}
@@ -111,9 +130,10 @@ export const TsunamiForm = ({
 
           <div className="flex justify-between gap-4 mt-6">
             <Button
-              variant="outline"
               disabled={currentStep === 0 || isLoading}
               onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
+              type="button"
+              variant="outline"
             >
               Anterior
             </Button>
@@ -124,11 +144,12 @@ export const TsunamiForm = ({
                   reset();
                   setCurrentStep(0);
                 }}
+                type="button"
               >
                 Nueva simulación
               </Button>
             ) : (
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? 'Procesando...' : 'Continuar'}
               </Button>
             )}

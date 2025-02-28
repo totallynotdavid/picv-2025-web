@@ -1,16 +1,25 @@
 import {
   Alert,
-  AlertTitle,
   AlertDescription,
+  AlertTitle,
 } from '@/app/_components/ui/templates/alert';
-import { JobStatus } from '@/lib/types';
-
-interface TsunamiResultsProps {
-  jobStatus: JobStatus | null;
-}
+import { TsunamiResultsProps } from '@/lib/types';
 
 export const TsunamiResults = ({ jobStatus }: TsunamiResultsProps) => {
   if (!jobStatus) return null;
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'text-green-600';
+      case 'error':
+        return 'text-red-600';
+      case 'processing':
+        return 'text-blue-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -25,13 +34,15 @@ export const TsunamiResults = ({ jobStatus }: TsunamiResultsProps) => {
           Estado de la simulación
         </AlertTitle>
         <AlertDescription className="mt-2 space-y-2">
-          <p>Estado: {jobStatus.status}</p>
+          <p className={getStatusColor(jobStatus.status)}>
+            Estado: {jobStatus.status}
+          </p>
           {jobStatus.download_url && (
             <a
+              className="text-blue-600 hover:underline block py-2"
               href={jobStatus.download_url}
-              className="text-blue-600 hover:underline"
-              target="_blank"
               rel="noopener noreferrer"
+              target="_blank"
             >
               Descargar reporte
             </a>

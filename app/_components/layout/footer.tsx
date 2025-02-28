@@ -5,8 +5,8 @@ const Footer = () => (
         <p className="text-gray-600">
           Creado en el{' '}
           <a
-            href="http://labtel.fisica.unmsm.edu.pe/"
             className="hover:underline transition"
+            href="http://labtel.fisica.unmsm.edu.pe/"
           >
             Laboratorio de Teledetección
           </a>

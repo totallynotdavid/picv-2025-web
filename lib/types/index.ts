@@ -1,16 +1,28 @@
 export interface JobStatus {
-  status: string;
   download_url?: string;
   error?: string;
+  status: string;
 }
 
 export interface ProgressIndicatorProps {
-  stage:
-    | 'idle'
-    | 'calculating'
-    | 'travelTimes'
-    | 'processing'
-    | 'complete'
-    | 'error';
   progress: number;
+  stage:
+    | 'calculating'
+    | 'complete'
+    | 'error'
+    | 'idle'
+    | 'processing'
+    | 'travelTimes';
+}
+
+export interface TsunamiFormData {
+  datetime: Date;
+  depth: number;
+  latitude: number;
+  longitude: number;
+  magnitude: number;
+}
+
+export interface TsunamiResultsProps {
+  jobStatus: JobStatus | null;
 }

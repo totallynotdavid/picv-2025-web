@@ -1,138 +1,178 @@
-import { useState, useCallback } from 'react';
-import { JobStatus, SourceParameters } from '@/lib/types/tsunami';
-import { GenerateFormData } from '@/lib/types/form';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { JobStatus, TsunamiFormData } from '@/lib/types';
+import { SourceParams } from '@/lib/types/tsunami';
+import { useCallback, useRef, useState } from 'react';
 
 type CalculationStage =
-  | 'idle'
   | 'calculating'
-  | 'processing'
   | 'complete'
-  | 'error';
+  | 'error'
+  | 'idle'
+  | 'processing';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export const useTsunamiCalculator = () => {
-  const [state, setState] = useState({
-    isLoading: false,
-    error: null as string | null,
-    currentStage: 'idle' as CalculationStage,
-    progress: 0,
-    sourceParams: null as SourceParameters | null,
-    jobStatus: null as JobStatus | null,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null);
+  const [currentStage, setCurrentStage] = useState<CalculationStage>('idle');
+  const [progress, setProgress] = useState(0);
+  const [sourceParams, setSourceParams] = useState<null | SourceParams>(null);
+  const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cleanupPolling = useCallback(() => {
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
   const pollJobStatus = useCallback(
-    async (jobId: string, signal?: AbortSignal) => {
+    async (jobId: string) => {
       try {
+        if (!abortControllerRef.current) {
+          abortControllerRef.current = new AbortController();
+        }
+
         const response = await fetch(`${API_BASE_URL}/job-status/${jobId}`, {
-          signal,
+          signal: abortControllerRef.current.signal,
         });
-        if (!response.ok)
+
+        if (!response.ok) {
           throw new Error('Error al obtener el estado del trabajo');
+        }
 
         const data = await response.json();
 
-        setState((prev) => ({
-          ...prev,
-          jobStatus: data,
-          progress:
-            data.status === 'completed'
-              ? 100
-              : Math.min(prev.progress + 10, 90),
-          currentStage: data.status === 'completed' ? 'complete' : 'processing',
-          isLoading: data.status !== 'completed',
-        }));
+        setJobStatus(data);
+        setProgress((prev) =>
+          data.status === 'completed' ? 100 : Math.min(prev + 5, 90),
+        );
 
-        if (data.status !== 'completed') {
-          setTimeout(() => pollJobStatus(jobId, signal), 5000);
+        if (data.status === 'completed') {
+          setCurrentStage('complete');
+          setIsLoading(false);
+          cleanupPolling();
+        } else if (data.status === 'error') {
+          setError(data.error || 'Error en la simulación');
+          setCurrentStage('error');
+          setIsLoading(false);
+          cleanupPolling();
+        } else {
+          pollingTimeoutRef.current = setTimeout(
+            () => pollJobStatus(jobId),
+            5000,
+          );
         }
       } catch (error: any) {
         if (error.name !== 'AbortError') {
-          setState((prev) => ({
-            ...prev,
-            error: 'Error al verificar el estado del trabajo',
-            currentStage: 'error',
-            isLoading: false,
-          }));
+          setError('Error al verificar el estado del trabajo');
+          setCurrentStage('error');
+          setIsLoading(false);
         }
       }
     },
-    [],
+    [cleanupPolling],
   );
 
   const calculateTsunami = useCallback(
-    async (values: GenerateFormData) => {
-      const controller = new AbortController();
+    async (values: TsunamiFormData) => {
+      cleanupPolling();
 
-      setState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: null,
-        currentStage: 'calculating',
-        progress: 0,
-      }));
+      abortControllerRef.current = new AbortController();
+
+      setIsLoading(true);
+      setError(null);
+      setCurrentStage('calculating');
+      setProgress(0);
 
       try {
+        // Step 1: Calculate source parameters
         const calculateRes = await fetch(`${API_BASE_URL}/calculate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
-          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          signal: abortControllerRef.current.signal,
         });
 
-        if (!calculateRes.ok) throw new Error('Error en cálculo inicial');
+        if (!calculateRes.ok) {
+          const errorData = await calculateRes.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error en cálculo inicial');
+        }
+
         const sourceParams = await calculateRes.json();
+        setSourceParams(sourceParams);
+        setProgress(30);
 
-        setState((prev) => ({ ...prev, sourceParams, progress: 30 }));
-
+        // Step 2: Calculate tsunami travel times
         const travelRes = await fetch(`${API_BASE_URL}/tsunami-travel-times`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
-          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          signal: abortControllerRef.current.signal,
         });
 
-        if (!travelRes.ok) throw new Error('Error en tiempos de viaje');
-        setState((prev) => ({ ...prev, progress: 50 }));
+        if (!travelRes.ok) {
+          const errorData = await travelRes.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error en tiempos de viaje');
+        }
 
+        setProgress(50);
+
+        // Step 3: Run TSDHN simulation
         const jobRes = await fetch(`${API_BASE_URL}/run-tsdhn`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
-          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          signal: abortControllerRef.current.signal,
         });
 
-        if (!jobRes.ok) throw new Error('Error al iniciar TSDHN');
-        const jobData = await jobRes.json();
+        if (!jobRes.ok) {
+          const errorData = await jobRes.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Error al iniciar TSDHN');
+        }
 
-        setState((prev) => ({ ...prev, progress: 70 }));
-        pollJobStatus(jobData.job_id, controller.signal);
+        const jobData = await jobRes.json();
+        setProgress(70);
+        setCurrentStage('processing');
+
+        pollJobStatus(jobData.job_id);
       } catch (error: any) {
         if (error.name !== 'AbortError') {
-          setState((prev) => ({
-            ...prev,
-            error: error.message,
-            currentStage: 'error',
-            isLoading: false,
-          }));
+          setError(error.message || 'Error en la simulación');
+          setCurrentStage('error');
+          setIsLoading(false);
         }
       }
-
-      return () => controller.abort();
     },
-    [pollJobStatus],
+    [cleanupPolling, pollJobStatus],
   );
 
   const reset = useCallback(() => {
-    setState({
-      isLoading: false,
-      error: null,
-      currentStage: 'idle',
-      progress: 0,
-      sourceParams: null,
-      jobStatus: null,
-    });
-  }, []);
+    cleanupPolling();
+    setIsLoading(false);
+    setError(null);
+    setCurrentStage('idle');
+    setProgress(0);
+    setSourceParams(null);
+    setJobStatus(null);
+  }, [cleanupPolling]);
 
-  return { ...state, calculateTsunami, reset };
+  return {
+    calculateTsunami,
+    currentStage,
+    error,
+    isLoading,
+    jobStatus,
+    progress,
+    reset,
+    sourceParams,
+  };
 };

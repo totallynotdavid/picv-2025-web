@@ -1,4 +1,3 @@
-import { useFormContext } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -9,15 +8,16 @@ import {
 } from '@/app/_components/ui/templates/form';
 import { Input } from '@/app/_components/ui/templates/input';
 import { FormInputProps } from '@/lib/types/form';
+import { useFormContext } from 'react-hook-form';
 
 export const FormInput = ({
-  name,
-  label,
-  type = 'text',
-  placeholder,
   description,
+  label,
+  name,
+  placeholder,
   step,
   transform = (value: string) => value,
+  type = 'text',
 }: FormInputProps) => {
   const { control } = useFormContext();
 
@@ -30,16 +30,16 @@ export const FormInput = ({
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Input
-              type={type}
-              step={step}
               placeholder={placeholder}
+              step={step}
+              type={type}
               {...field}
+              onChange={(e) => field.onChange(transform(e.target.value))}
               value={
                 field.value instanceof Date
                   ? field.value.toISOString().slice(0, 16)
                   : (field.value ?? '')
               }
-              onChange={(e) => field.onChange(transform(e.target.value))}
             />
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}

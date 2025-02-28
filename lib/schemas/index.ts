@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
 export const generateFormSchema = z.object({
-  magnitude: z
-    .number()
-    .min(6.5, { message: 'La magnitud mínima es 6.5' })
-    .max(9.5, { message: 'La magnitud máxima es 9.5' }),
+  datetime: z.preprocess((arg) => {
+    if (typeof arg === 'string' || arg instanceof Date) {
+      return new Date(arg);
+    }
+    return arg;
+  }, z.date()),
   depth: z
     .number()
     .min(0, { message: 'La profundidad mínima es 0 km' })
@@ -17,12 +19,10 @@ export const generateFormSchema = z.object({
     .number()
     .min(-180, { message: 'La longitud mínima es -180' })
     .max(180, { message: 'La longitud máxima es 180' }),
-  datetime: z.preprocess((arg) => {
-    if (typeof arg === 'string' || arg instanceof Date) {
-      return new Date(arg);
-    }
-    return arg;
-  }, z.date()),
+  magnitude: z
+    .number()
+    .min(6.5, { message: 'La magnitud mínima es 6.5' })
+    .max(9.5, { message: 'La magnitud máxima es 9.5' }),
 });
 
 export type GenerateFormType = z.infer<typeof generateFormSchema>;

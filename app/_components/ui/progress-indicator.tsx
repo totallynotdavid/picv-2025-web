@@ -3,15 +3,15 @@ import { ProgressIndicatorProps } from '@/lib/types/index';
 
 const stageMessages = {
   calculating: 'Calculando parámetros iniciales...',
-  travelTimes: 'Calculando tiempos de viaje del tsunami...',
-  processing: 'Ejecutando simulación TSDHN...',
   complete: 'Simulación completada',
   error: 'Error en la simulación',
+  processing: 'Ejecutando simulación TSDHN...',
+  travelTimes: 'Calculando tiempos de viaje del tsunami...',
 };
 
 export const ProgressIndicator = ({
-  stage,
   progress,
+  stage,
 }: ProgressIndicatorProps) => {
   if (stage === 'idle') return null;
 
@@ -21,7 +21,7 @@ export const ProgressIndicator = ({
         <span>{stageMessages[stage] || ''}</span>
         <span>{progress}%</span>
       </div>
-      <Progress value={progress} className="h-2" />
+      <Progress className="h-2" value={progress} />
 
       {stage === 'processing' && (
         <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md mt-2">
