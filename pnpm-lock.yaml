@@ -67,6 +67,9 @@ importers:
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
+      leaflet-defaulticon-compatibility:
+        specifier: ^0.1.2
+        version: 0.1.2
       lucide-react:
         specifier: ^0.279.0
         version: 0.279.0(react@18.2.0)
@@ -95,11 +98,14 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       react-hook-form:
-        specifier: ^7.46.1
+        specifier: ^7.54.2
         version: 7.54.2(react@18.2.0)
       react-hot-toast:
         specifier: ^2.4.1
         version: 2.5.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-leaflet:
+        specifier: ^5.0.0
+        version: 5.0.0(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-use-measure:
         specifier: ^2.1.1
         version: 2.1.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -524,6 +530,16 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@react-leaflet/core@3.0.0':
+    resolution:
+      {
+        integrity: sha512-3EWmekh4Nz+pGcr+xjf0KNyYfC3U2JjnkWsh0zcqaexYqmmB5ZhH37kz41JXGmKzpaMZCnPofBBm64i+YrEvGQ==,
+      }
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   '@rtsao/scc@1.1.0':
     resolution:
@@ -3188,6 +3204,12 @@ packages:
       }
     engines: { node: '>=0.10' }
 
+  leaflet-defaulticon-compatibility@0.1.2:
+    resolution:
+      {
+        integrity: sha512-IrKagWxkTwzxUkFIumy/Zmo3ksjuAu3zEadtOuJcKzuXaD76Gwvg2Z1mLyx7y52ykOzM8rAH5ChBs4DnfdGa6Q==,
+      }
+
   leaflet@1.9.4:
     resolution:
       {
@@ -3872,6 +3894,16 @@ packages:
       {
         integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==,
       }
+
+  react-leaflet@5.0.0:
+    resolution:
+      {
+        integrity: sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==,
+      }
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   react-use-measure@2.1.1:
     resolution:
@@ -4903,6 +4935,12 @@ snapshots:
       react: 18.2.0
     optionalDependencies:
       '@types/react': 18.2.21
+
+  '@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      leaflet: 1.9.4
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@rtsao/scc@1.1.0': {}
 
@@ -7405,6 +7443,8 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.23
 
+  leaflet-defaulticon-compatibility@0.1.2: {}
+
   leaflet@1.9.4: {}
 
   levn@0.4.1:
@@ -7764,6 +7804,13 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
+
+  react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      leaflet: 1.9.4
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   react-use-measure@2.1.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:

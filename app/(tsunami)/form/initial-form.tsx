@@ -1,10 +1,8 @@
+'use client';
+
 import { FormInput } from '@/app/(tsunami)/form/form-input';
-import { Form } from '@/app/_components/ui/templates/form';
-import { useFormContext } from 'react-hook-form';
 
 export const InitialForm = () => {
-  const form = useFormContext();
-
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 p-4 rounded-lg">
@@ -17,53 +15,51 @@ export const InitialForm = () => {
         </p>
       </div>
 
-      <Form {...form}>
-        <form className="space-y-6">
+      <div className="space-y-6">
+        <FormInput
+          label="Magnitud (Mw)"
+          name="magnitude"
+          placeholder="Mínimo 6.5 Mw"
+          step="0.1"
+          transform={parseFloat}
+          type="number"
+        />
+
+        <FormInput
+          label="Profundidad (km)"
+          name="depth"
+          placeholder="Profundidad en kilómetros"
+          step="0.1"
+          transform={parseFloat}
+          type="number"
+        />
+
+        <div className="grid grid-cols-2 gap-4">
           <FormInput
-            label="Magnitud (Mw)"
-            name="magnitude"
-            placeholder="Mínimo 6.5 Mw"
+            label="Latitud"
+            name="latitude"
+            placeholder="-90 a 90"
             step="0.1"
             transform={parseFloat}
             type="number"
           />
-
           <FormInput
-            label="Profundidad (km)"
-            name="depth"
-            placeholder="Profundidad en kilómetros"
+            label="Longitud"
+            name="longitude"
+            placeholder="-180 a 180"
             step="0.1"
             transform={parseFloat}
             type="number"
           />
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <FormInput
-              label="Latitud"
-              name="latitude"
-              placeholder="-90 a 90"
-              step="0.1"
-              transform={parseFloat}
-              type="number"
-            />
-            <FormInput
-              label="Longitud"
-              name="longitude"
-              placeholder="-180 a 180"
-              step="0.1"
-              transform={parseFloat}
-              type="number"
-            />
-          </div>
-
-          <FormInput
-            label="Fecha y hora del evento"
-            name="datetime"
-            transform={(v) => new Date(v)}
-            type="datetime-local"
-          />
-        </form>
-      </Form>
+        <FormInput
+          label="Fecha y hora del evento"
+          name="datetime"
+          transform={(v) => new Date(v)}
+          type="datetime-local"
+        />
+      </div>
     </div>
   );
 };

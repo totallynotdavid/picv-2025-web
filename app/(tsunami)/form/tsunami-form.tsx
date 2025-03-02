@@ -9,12 +9,11 @@ import {
   AlertTitle,
 } from '@/app/_components/ui/templates/alert';
 import { Button } from '@/app/_components/ui/templates/button';
-import { Form } from '@/app/_components/ui/templates/form';
 import { TsunamiFormData, TsunamiFormProps } from '@/lib/types/tsunami';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const tsunamiFormSchema = z.object({
@@ -68,19 +67,16 @@ export const TsunamiForm = ({
 
   useEffect(() => {
     const subscription = form.watch((values) => {
-      const lat = values.latitude;
-      const lng = values.longitude;
-
+      const { latitude, longitude } = values;
       if (
-        typeof lat === 'number' &&
-        typeof lng === 'number' &&
-        !isNaN(lat) &&
-        !isNaN(lng)
+        typeof latitude === 'number' &&
+        typeof longitude === 'number' &&
+        !isNaN(latitude) &&
+        !isNaN(longitude)
       ) {
-        onLocationUpdate({ lat, lng });
+        onLocationUpdate({ lat: latitude, lng: longitude });
       }
     });
-
     return () => subscription.unsubscribe();
   }, [form, onLocationUpdate]);
 
@@ -102,6 +98,18 @@ export const TsunamiForm = ({
     transition: { duration: 0.3 },
   };
 
+  const getStepLabel = () => {
+    if (!jobStatus?.details) return 'Procesando...';
+    const { current_step, total_steps } = jobStatus.details;
+    if (current_step && total_steps) {
+      return `Paso ${current_step} de ${total_steps}`;
+    }
+    if (current_step) {
+      return `Procesando: ${current_step}`;
+    }
+    return 'Procesando...';
+  };
+
   return (
     <div className="space-y-4">
       {error && (
@@ -111,16 +119,23 @@ export const TsunamiForm = ({
         </Alert>
       )}
 
-      <Form {...form}>
+      <FormProvider {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
           <AnimatePresence mode="wait">
             <motion.div key={currentStep} {...transitions}>
               {currentStep === 0 && <InitialForm />}
-
               {currentStep === 1 && (
                 <>
                   <SourceParameters parameters={sourceParams} />
-                  <ProgressIndicator progress={progress} stage={currentStage} />
+                  <div className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {getStepLabel()}
+                    </p>
+                    <ProgressIndicator
+                      progress={progress}
+                      stage={currentStage}
+                    />
+                  </div>
                 </>
               )}
               {currentStep === 2 && <TsunamiResults jobStatus={jobStatus} />}
@@ -154,7 +169,7 @@ export const TsunamiForm = ({
             )}
           </div>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 };

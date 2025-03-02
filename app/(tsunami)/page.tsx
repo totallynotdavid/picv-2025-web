@@ -1,11 +1,20 @@
 'use client';
 
 import { TsunamiForm } from '@/app/(tsunami)/form/tsunami-form';
-import TsunamiMap from '@/app/(tsunami)/map/tsunami-map';
 import { Location } from '@/lib/types/tsunami';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
+
+const TsunamiMap = dynamic(() => import('@/app/(tsunami)/map/tsunami-map'), {
+  loading: () => (
+    <div className="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
+      Cargando mapa...
+    </div>
+  ),
+  ssr: false,
+});
 
 export default function TsunamiPage() {
   const [selectedLocation, setSelectedLocation] = useState<Location>({
