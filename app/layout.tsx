@@ -7,10 +7,10 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-let title = 'Pronóstico de tsunamis: TSDHN';
-let description = 'Pronóstico de tsunamis: TSDHN en 10 minutos';
-let url = 'https://tsdhn.vercel.app/';
-let sitename = 'TSDHN';
+const title = 'Pronóstico de tsunamis: TSDHN';
+const description = 'Pronóstico de tsunamis: TSDHN en 10 minutos';
+const url = 'https://tsdhn.vercel.app/';
+const sitename = 'TSDHN';
 
 export const metadata: Metadata = {
   description,
