@@ -1,118 +1,101 @@
 'use client';
 
-import { memo, useEffect, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css';
+import 'leaflet-defaulticon-compatibility';
 import { MapContentProps } from '@/lib/types/map';
+import { useEffect, useRef } from 'react';
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  ZoomControl,
+} from 'react-leaflet';
 
-const MapContent = memo(
-  ({ onLocationSelect, selectedLocation }: MapContentProps) => {
-    const [LeafletComponents, setLeafletComponents] = useState<null | {
-      MapContainer: any;
-      Marker: any;
-      TileLayer: any;
-      useMap: any;
-      ZoomControl: any;
-    }>(null);
-    const [isClient, setIsClient] = useState(false);
+const DEFAULT_POSITION: [number, number] = [-20.5, -70.5];
 
-    useEffect(() => {
-      setIsClient(true);
+const TsunamiMap = ({
+  onLocationSelect,
+  selectedLocation,
+}: MapContentProps) => {
+  const position = selectedLocation
+    ? [selectedLocation.lat, selectedLocation.lng]
+    : DEFAULT_POSITION;
 
-      if (typeof window === 'undefined') return;
+  const prevLocationRef = useRef(selectedLocation);
 
-      (async () => {
-        const { MapContainer, Marker, TileLayer, useMap, ZoomControl } =
-          await import('react-leaflet');
-        const L = await import('leaflet');
+  return (
+    <div className="w-full h-[600px] rounded-lg overflow-hidden">
+      <MapContainer
+        center={position as [number, number]}
+        maxZoom={18}
+        minZoom={2}
+        scrollWheelZoom={true}
+        style={{ height: '100%', width: '100%' }}
+        zoom={4}
+        zoomControl={false}
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <ZoomControl position="topright" />
+        <MapClickHandler onLocationSelect={onLocationSelect} />
+        {selectedLocation && (
+          <>
+            <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
+            <LocationUpdater
+              prevLocation={prevLocationRef.current}
+              selectedLocation={selectedLocation}
+            />
+          </>
+        )}
+      </MapContainer>
+    </div>
+  );
+};
 
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: '/markers/marker-icon-2x.png',
-          iconUrl: '/markers/marker-icon.png',
-          shadowUrl: '/markers/marker-shadow.png',
-        });
+function LocationUpdater({
+  prevLocation,
+  selectedLocation,
+}: {
+  prevLocation?: { lat: number; lng: number };
+  selectedLocation: { lat: number; lng: number };
+}) {
+  const map = useMap();
 
-        setLeafletComponents({
-          MapContainer,
-          Marker,
-          TileLayer,
-          useMap,
-          ZoomControl,
-        });
-      })();
-    }, []);
+  useEffect(() => {
+    // Only update if location has actually changed
+    if (
+      !prevLocation ||
+      prevLocation.lat !== selectedLocation.lat ||
+      prevLocation.lng !== selectedLocation.lng
+    ) {
+      map.setView([selectedLocation.lat, selectedLocation.lng], 8);
+    }
+  }, [map, selectedLocation, prevLocation]);
 
-    if (!isClient || !LeafletComponents) {
-      return (
-        <div className="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">
-          Cargando mapa...
-        </div>
-      );
+  return null;
+}
+
+function MapClickHandler({
+  onLocationSelect,
+}: {
+  onLocationSelect: (lat: number, lng: number) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    function handleClick(e: any) {
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
     }
 
-    const { MapContainer, Marker, TileLayer, useMap, ZoomControl } =
-      LeafletComponents;
+    map.on('click', handleClick);
 
-    const MapClickHandler = ({
-      onLocationSelect,
-    }: {
-      onLocationSelect: (lat: number, lng: number) => void;
-    }) => {
-      const map = useMap();
-      useEffect(() => {
-        const handleMapClick = (e: any) => {
-          onLocationSelect(e.latlng.lat, e.latlng.lng);
-        };
-        map.on('click', handleMapClick);
-        return () => {
-          map.off('click', handleMapClick);
-        };
-      }, [map, onLocationSelect]);
-      return null;
+    return () => {
+      map.off('click', handleClick);
     };
+  }, [map, onLocationSelect]);
 
-    const FlyToLocation = ({
-      selectedLocation,
-    }: {
-      selectedLocation: { lat: number; lng: number };
-    }) => {
-      const map = useMap();
-      useEffect(() => {
-        if (selectedLocation) {
-          map.flyTo([selectedLocation.lat, selectedLocation.lng], 8, {
-            duration: 1.5,
-          });
-        }
-      }, [map, selectedLocation]);
-      return null;
-    };
+  return null;
+}
 
-    return (
-      <div className="w-full h-[600px] rounded-lg overflow-hidden">
-        <MapContainer
-          center={[20, 0]}
-          maxZoom={18}
-          minZoom={2}
-          style={{ height: '100%', width: '100%' }}
-          zoom={2}
-          zoomControl={false}
-        >
-          <TileLayer
-            maxZoom={19}
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <ZoomControl position="topright" />
-          <MapClickHandler onLocationSelect={onLocationSelect} />
-          {selectedLocation && (
-            <>
-              <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
-              <FlyToLocation selectedLocation={selectedLocation} />
-            </>
-          )}
-        </MapContainer>
-      </div>
-    );
-  },
-);
-
-MapContent.displayName = 'MapContent';
-
-export default MapContent;
+export default TsunamiMap;

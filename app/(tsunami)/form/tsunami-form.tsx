@@ -60,8 +60,15 @@ export const TsunamiForm = ({
 
   useEffect(() => {
     if (selectedLocation) {
-      form.setValue('latitude', selectedLocation.lat);
-      form.setValue('longitude', selectedLocation.lng);
+      const currentLat = form.getValues('latitude');
+      const currentLng = form.getValues('longitude');
+      if (
+        currentLat !== selectedLocation.lat ||
+        currentLng !== selectedLocation.lng
+      ) {
+        form.setValue('latitude', selectedLocation.lat);
+        form.setValue('longitude', selectedLocation.lng);
+      }
     }
   }, [selectedLocation, form]);
 
