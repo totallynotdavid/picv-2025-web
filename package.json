@@ -28,7 +28,7 @@
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^0.477.0",
-    "motion": "^12.0.1",
+    "motion": "^12.4.10",
     "next": "15.1.2",
     "postcss": "8.4.29",
     "prettier": "^3.0.3",
